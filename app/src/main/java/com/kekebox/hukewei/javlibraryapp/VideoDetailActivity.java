@@ -2,6 +2,7 @@ package com.kekebox.hukewei.javlibraryapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -16,6 +17,9 @@ import android.widget.Toast;
 import com.github.clans.fab.FloatingActionButton;
 import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.koushikdutta.ion.Ion;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 
@@ -34,6 +38,8 @@ public class VideoDetailActivity extends ActionBarActivity {
     FloatingActionButton fabWeb;
     VideoInfoItem item;
     ImageViewTouch mImage;
+    private DisplayImageOptions options;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +57,13 @@ public class VideoDetailActivity extends ActionBarActivity {
         actors = (TextView) findViewById(R.id.actors);
         fabWeb = (FloatingActionButton) findViewById(R.id.menu_item_web);
         fabShare = (FloatingActionButton) findViewById(R.id.menu_item_share);
+        options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.placeholder)
+                .showImageForEmptyUri(R.drawable.placeholder)
+                .showImageOnFail(R.drawable.placeholder)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
 
         if(JavLibApplication.getCurrentVideoItem() == null) {
             finish();
@@ -58,7 +71,7 @@ public class VideoDetailActivity extends ActionBarActivity {
             item = JavLibApplication.getCurrentVideoItem();
             designation.setText("识别码：\t" + item.getDesignation());
             title.setText("片名：\t" + item.getTitle());
-            release_date.setText("发行日期：\t" + item.getReleaseDate());
+            release_date.setText("发行：\t" + item.getReleaseDate());
             duration.setText("长度：\t" + item.getDuration() + " 分钟");
             String category = "分类：\t";
             for(int i = 0; i< item.getCategories().size();i++) {
@@ -71,12 +84,13 @@ public class VideoDetailActivity extends ActionBarActivity {
             }
             actors.setText(actor);
 
+            ImageLoader.getInstance().displayImage(item.getImageUrls(), mImage, options,new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            findViewById(R.id.pic_progressbar).setVisibility(View.GONE);
+                        }
+                    });
 
-            Ion.with(mImage)
-                    .placeholder(R.drawable.placeholder)
-                    .error(R.drawable.placeholder)
-                    .centerCrop()
-                    .load(item.getImageUrls());
 
             fabWeb.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -105,7 +119,7 @@ public class VideoDetailActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

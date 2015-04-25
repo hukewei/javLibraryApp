@@ -11,9 +11,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -22,15 +24,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
 import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
-import com.quentindommerc.superlistview.OnMoreListener;
-import com.quentindommerc.superlistview.SuperListview;
-import com.quentindommerc.superlistview.SwipeDismissListViewTouchListener;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -39,6 +43,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -46,19 +51,25 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 
-public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, OnMoreListener {
+public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+
+    private TextView txtuser;
+    private TextView locations;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    ListView myListView;
+    ArrayList<String> pendingList;
+    ProgressBar pb;
+    int nbTaskOnGoing = 0;
+    int nbTaskLoaded = 0;
+    static final int NB_FIRST_LOAD_TASK = 20;
+    static final int NB_TASK_LOAD_SCROLL = 5;
 
 
-    private SuperListview mList;
+
     private VideoPictureAdapter mAdapter;
 
     // Declare Variable
-    private ArrayList<VideoInfoItem> VideoItemList = new ArrayList<>();
-    private Spinner spinner;
-    private int filterListResID;
-
-    private int filterIconResID;
-    private int Type;
+    private ArrayList<VideoInfoItem> VideoItemList;
     private final static String TAG = "BasicOfferFragment";
     private static final String ARG_VIDEO_TYPE = "section_number";
     private JavLibApplication.VideoType type;
@@ -85,18 +96,39 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentActivity faActivity  = (FragmentActivity)    super.getActivity();
         // Replace LinearLayout by the type of the root element of the layout you're trying to load
-        RelativeLayout llLayout    = (RelativeLayout)    inflater.inflate(R.layout.fragment_base_view, container, false);
-        // Empty list view demo, just pull to add more items
-        mAdapter = new VideoPictureAdapter(getActivity(), VideoItemList);
-
-
-        // This is what you're looking for
-        mList = (SuperListview)llLayout.findViewById(R.id.list);
-
         type = JavLibApplication.VideoType.valueOf(getArguments().getString(ARG_VIDEO_TYPE));
+        LinearLayout llLayout    = (LinearLayout)    inflater.inflate(R.layout.fragment_base_view, container, false);
+        pb = (ProgressBar) llLayout.findViewById(R.id.video_detail_progress);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) llLayout.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
-        mList.setAdapter(mAdapter);
-        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        switch (type) {
+            case MostWanted:
+                VideoItemList = JavLibApplication.getMostWantedItemList();
+                pendingList = ((JavLibApplication)getActivity().getApplication()).getMostWantedPendingIDs();
+                break;
+            case BestRated:
+                VideoItemList = JavLibApplication.getBestRatedItemList();
+                pendingList = ((JavLibApplication)getActivity().getApplication()).getBestRatedPendingIDs();
+                break;
+            case NewEntries:
+                VideoItemList = JavLibApplication.getNewEntriesItemList();
+                pendingList = ((JavLibApplication)getActivity().getApplication()).getNewEntriesPendingIDs();
+                break;
+            case NewReleases:
+                VideoItemList = JavLibApplication.getNewReleasesItemList();
+                pendingList = ((JavLibApplication)getActivity().getApplication()).getNewReleasesPendingIDs();
+                break;
+        }
+
+        mAdapter = new VideoPictureAdapter(getActivity(), VideoItemList);
+        myListView = ((ListView)llLayout.findViewById(R.id.video_list));
+        myListView.setAdapter(mAdapter);
+        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 VideoInfoItem item = VideoItemList.get(position);
@@ -105,41 +137,22 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 startActivity(intent);
             }
         });
-
-
-        // Setting the refresh listener will enable the refresh progressbar
-        mList.setRefreshListener(this);
-
-        // Wow so beautiful
-//        mList.setRefreshingColor(getResources().getColor(android.R.color.holo_orange_light),
-//                getResources().getColor(android.R.color.holo_blue_light),
-//                getResources().getColor(android.R.color.holo_green_light), getResources().getColor(android.R.color.holo_red_light));
-
-        // I want to get loadMore triggered if I see the last item (1)
-        mList.setupMoreListener(this, 1);
-
-        mList.setupSwipeToDismiss(new SwipeDismissListViewTouchListener.DismissCallbacks() {
+        myListView.setOnScrollListener(new EndlessScrollListener() {
             @Override
-            public boolean canDismiss(int position) {
-                return true;
+            public void onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
+                for (int i = 0; i < videos_to_load.size(); i++) {
+                    VideoDetailRetrieveTask atask = new VideoDetailRetrieveTask(getActivity(), videos_to_load.get(i), type);
+                    atask.execute((Void) null);
+                }
+                // or customLoadMoreDataFromApi(totalItemsCount);
             }
+        });
 
-            @Override
-            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-            }
-        }, false);
-
-
-
-
-        return llLayout;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if(mAdapter.isEmpty()) {
-            final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, 10);
+        if(VideoItemList.isEmpty()) {
+            final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
             for (int i = 0; i < videos_to_load.size(); i++) {
                 Handler handler = new Handler();
                 final int finalI = i;
@@ -150,38 +163,42 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                         atask.execute((Void) null);
 
                     }
-                }, 100);
+                }, 0);
 
             }
+        } else {
+            myListView.setVisibility(View.VISIBLE);
+            pb.setVisibility(View.GONE);
+
         }
+
+
+
+        return llLayout;
     }
 
     @Override
     public void onRefresh() {
-        Toast.makeText(getActivity(), "Refresh", Toast.LENGTH_LONG).show();
-
-        // enjoy the beaty of the progressbar
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
 
-                // demo purpose, adding to the top so you can see it
-                //mAdapter.insert("New stuff", 0);
+                Toast.makeText(getActivity(), "别着急，暂时没有新片哦！", Toast.LENGTH_LONG).show();
+                mSwipeRefreshLayout.setRefreshing(false);
 
             }
         }, 2000);
 
-
     }
-
-    @Override
-    public void onMoreAsked(int numberOfItems, int numberBeforeMore, int currentItemPos) {
-        ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, 3);
-        for (int i = 0; i < videos_to_load.size(); i++) {
-            VideoDetailRetrieveTask atask = new VideoDetailRetrieveTask(getActivity(), videos_to_load.get(i), type);
-            atask.execute((Void) null);
-        }
-    }
+//
+//    @Override
+//    public void onMoreAsked(int numberOfItems, int numberBeforeMore, int currentItemPos) {
+//        ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, 3);
+//        for (int i = 0; i < videos_to_load.size(); i++) {
+//            VideoDetailRetrieveTask atask = new VideoDetailRetrieveTask(getActivity(), videos_to_load.get(i), type);
+//            atask.execute((Void) null);
+//        }
+//    }
 
     public class VideoDetailRetrieveTask extends AsyncTask<Void, Void, Boolean> {
         private static final String TAG = "VideoDetailRetrieveTask";
@@ -213,26 +230,24 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            nbTaskOnGoing++;
             HttpClient client = new DefaultHttpClient();
             HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
             HttpResponse response;
-            //SystemClock.sleep(1000);
 
             try {
                 HttpGet get = new HttpGet(mFeedURL+ "/" + mVideoId);
                 response = client.execute(get);
 
-                /*Checking response */
                 if(response!=null && response.getStatusLine().getStatusCode() == 200){
                     String json_string = EntityUtils.toString(response.getEntity());
                     Log.i(TAG, json_string);
                     JSONObject jsonObj = new JSONObject(json_string);
                     final VideoInfoItem currentItem = new VideoInfoItem(jsonObj);
                     getActivity().runOnUiThread(new Runnable() {
-                        @Override
                         public void run() {
-                            if(mAdapter!= null)
-                                VideoItemList.add(currentItem);
+                            VideoItemList.add(currentItem);
+                            mAdapter.notifyDataSetChanged();
                         }
                     });
                     return true;
@@ -248,18 +263,32 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         protected void onPostExecute(final Boolean success) {
             //Things to do when Task finished with success or not
             //mMileAccrualHistoryTask = null;
+            nbTaskLoaded++;
             if (success) {
-
-                ((JavLibApplication)getActivity().getApplication()).onLoadSucceed(mVideoId, mType);
+                JavLibApplication.onLoadSucceed(mVideoId, mType);
             } else {
-                ((JavLibApplication)getActivity().getApplication()).onLoadFailed(mVideoId, mType);
-                Toast.makeText(mContext,"载入失败，请重试！", Toast.LENGTH_SHORT);
+                JavLibApplication.onLoadFailed(mVideoId, mType);
+                //Toast.makeText(mContext,"载入失败，请重试！", Toast.LENGTH_SHORT).show();
+            }
+            nbTaskOnGoing--;
+            if(NB_FIRST_LOAD_TASK==nbTaskLoaded) {
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+
+                        myListView.setVisibility(View.VISIBLE);
+                        pb.setVisibility(View.GONE);
+
+                    }
+                }, 2000);
             }
 
         }
 
         @Override
         protected void onCancelled() {
+            nbTaskLoaded++;
+            nbTaskOnGoing--;
             //mMileAccrualHistoryTask = null;
         }
     }

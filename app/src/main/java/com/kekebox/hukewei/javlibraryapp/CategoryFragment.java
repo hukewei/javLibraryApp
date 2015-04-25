@@ -61,10 +61,10 @@ public class CategoryFragment extends android.support.v4.app.Fragment implements
         // Bind the tabs to the ViewPager
         tabs = (PagerSlidingTabStrip) llLayout.findViewById(R.id.tabs);
         tabs.setViewPager(viewPager);
-        tabs.setShouldExpand(true);
+        tabs.setShouldExpand(false);
         tabs.setDividerColor(Color.TRANSPARENT);
-        tabs.setBackgroundColor(Color.LTGRAY);
-        tabs.setIndicatorColor(Color.BLUE);
+        tabs.setBackgroundColor(Color.WHITE);
+        tabs.setIndicatorColor(getResources().getColor(R.color.fuchsia));
         return llLayout;
     }
     private Drawable.Callback drawableCallback = new Drawable.Callback() {
