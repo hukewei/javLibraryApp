@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 
 import com.koushikdutta.ion.Ion;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
@@ -102,6 +103,13 @@ public class VideoPictureAdapter extends ArrayAdapter implements Filterable {
         }
         viewHolder.tvTitle.setText(item.getTitle());
         viewHolder.tvDesignation.setText(item.getDesignation());
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.placeholder)
+                .showImageForEmptyUri(R.drawable.placeholder)
+                .showImageOnFail(R.drawable.placeholder)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
 
         if(MainActivity.ENABLE_THUMBS) {
             ImageLoader.getInstance().displayImage(item.getImagesThumbUrl(), viewHolder.ivPicture);

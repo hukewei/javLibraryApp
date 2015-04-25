@@ -61,7 +61,8 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
     ProgressBar pb;
     int nbTaskOnGoing = 0;
     int nbTaskLoaded = 0;
-    static final int NB_FIRST_LOAD_TASK = 15;
+    static final int NB_FIRST_LOAD_TASK = 20;
+    static final int NB_TASK_LOAD_SCROLL = 5;
 
 
 
@@ -134,6 +135,19 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 JavLibApplication.setCurrentVideoItem(item);
                 Intent intent = new Intent(getActivity(), VideoDetailActivity.class);
                 startActivity(intent);
+            }
+        });
+        myListView.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
+                for (int i = 0; i < videos_to_load.size(); i++) {
+                    VideoDetailRetrieveTask atask = new VideoDetailRetrieveTask(getActivity(), videos_to_load.get(i), type);
+                    atask.execute((Void) null);
+                }
+                // or customLoadMoreDataFromApi(totalItemsCount);
             }
         });
 
@@ -220,7 +234,6 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             HttpClient client = new DefaultHttpClient();
             HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
             HttpResponse response;
-            //SystemClock.sleep(1000);
 
             try {
                 HttpGet get = new HttpGet(mFeedURL+ "/" + mVideoId);
@@ -231,7 +244,12 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     Log.i(TAG, json_string);
                     JSONObject jsonObj = new JSONObject(json_string);
                     final VideoInfoItem currentItem = new VideoInfoItem(jsonObj);
-                    VideoItemList.add(currentItem);
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            VideoItemList.add(currentItem);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
                     return true;
 
                 }
@@ -247,12 +265,10 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             //mMileAccrualHistoryTask = null;
             nbTaskLoaded++;
             if (success) {
-
                 JavLibApplication.onLoadSucceed(mVideoId, mType);
-
             } else {
                 JavLibApplication.onLoadFailed(mVideoId, mType);
-                Toast.makeText(mContext,"载入失败，请重试！", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mContext,"载入失败，请重试！", Toast.LENGTH_SHORT).show();
             }
             nbTaskOnGoing--;
             if(NB_FIRST_LOAD_TASK==nbTaskLoaded) {

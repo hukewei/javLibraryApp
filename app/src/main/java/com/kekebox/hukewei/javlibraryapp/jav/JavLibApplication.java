@@ -115,6 +115,7 @@ public class JavLibApplication extends Application {
             for (int i = 0; i <number ; i++) {
                 if (!pending_pool.contains(id_pool.get(i))) {
                     list_to_load.add(id_pool.get(i));
+                    pending_pool.add(id_pool.get(i));
                 }
             }
         }

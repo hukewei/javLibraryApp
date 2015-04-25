@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#e5e5e5"
+    android:background="#f7f7fa"
     android:id="@+id/ranging_fragment">
 
     <RelativeLayout
@@ -44,8 +44,8 @@
                 android:layout_height="match_parent"
                 android:layout_margin="8dp"
                 android:gravity="fill_vertical"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="10.0sp"
+                android:divider="@android:color/darker_gray"
+                android:dividerHeight="0.3sp"
                 android:paddingLeft="7dp"
                 android:paddingRight="7dp"
                 android:clipToPadding="false"

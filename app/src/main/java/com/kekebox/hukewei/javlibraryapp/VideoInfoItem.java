@@ -26,6 +26,7 @@ public class VideoInfoItem {
     private ArrayList<String> actors = new ArrayList<>();
     private String imageUrls;
     private String imagesThumbUrl;
+    private boolean isLiked = false;
 
 
 /*    {

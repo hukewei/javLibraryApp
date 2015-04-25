@@ -15,7 +15,6 @@ public class VideosTabsPagerAdapter  extends FragmentStatePagerAdapter {
         super(fm);
     }
     String[] tabs = {"最想要", "高评分", "新推出", "新上架"};
-    //String[] tabs = {"最想要", "高评分", "新推出"};
     @Override
     public Fragment getItem(int index) {
 
