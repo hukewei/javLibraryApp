@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MyJavLib</string>
+    <string name="title_section1">首页</string>
+    <string name="title_section2">搜索</string>
+    <string name="title_section3">个人中心</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">访问网站</string>
+    <string name="action_settings">Settings</string>
+    <string name="most_wanted_feed_url">http://vpn.kekebox.com/slim_php_mongo_rest/javLibrary/most_wanted</string>
+    <string name="best_rated_feed_url">http://vpn.kekebox.com/slim_php_mongo_rest/javLibrary/best_rated</string>
+    <string name="new_releases_feed_url">http://vpn.kekebox.com/slim_php_mongo_rest/javLibrary/new_releases</string>
+    <string name="new_entries_feed_url">http://vpn.kekebox.com/slim_php_mongo_rest/javLibrary/new_entries</string>
+
+
+</resources>
