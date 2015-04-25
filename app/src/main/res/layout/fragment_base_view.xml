@@ -1,17 +1,60 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#e5e5e5"
+    android:id="@+id/ranging_fragment">
 
-    <com.quentindommerc.superlistview.SuperListview
-        xmlns:superlistview="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/list"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        superlistview:superlv__listClipToPadding="false"
-        superlistview:superlv__listDivider="@color/silver"
-        superlistview:superlv__listDividerHeight="1dp"
-        superlistview:superlv__empty="@layout/emptyview"
-        superlistview:superlv__moreProgress="@layout/view_more_progress"
-        superlistview:superlv__scrollbarStyle="outsideOverlay" >
-    </com.quentindommerc.superlistview.SuperListview>
-</RelativeLayout>
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:gravity="left|center">
+        <ProgressBar android:id="@+id/video_detail_progress" style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp" />
+        <LinearLayout android:id="@+id/user_history_empty"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="60dp"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="请刷新"
+                android:textColor="#a6a6a8"
+                android:textSize="18dp" />
+        </LinearLayout>
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:gravity="fill_vertical"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="10.0sp"
+                android:paddingLeft="7dp"
+                android:paddingRight="7dp"
+                android:clipToPadding="false"
+                android:paddingTop="12dip"
+                android:paddingBottom="12dip"
+                android:scrollbarStyle="outsideOverlay"
+                android:id="@+id/video_list"
+                android:visibility="gone" />
+        </android.support.v4.widget.SwipeRefreshLayout>
+    </RelativeLayout>
+
+</LinearLayout>
