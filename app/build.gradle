@@ -22,6 +22,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('libs/universal-image-loader-1.9.3.jar')
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'com.github.clans:fab:1.4.0'
@@ -29,7 +30,5 @@ dependencies {
     compile 'com.koushikdutta.ion:ion:2.+'
     compile 'it.sephiroth.android.library.imagezoom:imagezoom:+'
     compile files('libs/universal-image-loader-1.9.3.jar')
-    // Toolbar and ActionBarCompat-v21 (includes support-v7:21.0.x)
-    compile 'com.balysv.materialmenu:material-menu-abc:1.5.1'
 
 }

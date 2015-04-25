@@ -21,10 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.balysv.materialmenu.MaterialMenuDrawable;
-import com.balysv.materialmenu.MaterialMenuIcon;
-import com.balysv.materialmenu.extras.abc.MaterialMenuIconCompat;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
+
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
@@ -62,8 +59,6 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
-
         ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
 
     }
