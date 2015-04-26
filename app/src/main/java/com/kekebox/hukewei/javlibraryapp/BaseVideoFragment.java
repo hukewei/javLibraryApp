@@ -140,7 +140,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             public void onLoadMore(int page, int totalItemsCount) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to your AdapterView
-                final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
+                final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
                 new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
 //                ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
 //                for (int i = 0; i < videos_to_load.size(); i++) {
