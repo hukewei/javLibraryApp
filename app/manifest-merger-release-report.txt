@@ -30,10 +30,6 @@ MERGED from com.android.support:support-v4:21.0.3:16:5
 MERGED from com.github.clans:fab:1.4.0:12:5
 MERGED from com.github.navasmdc:MaterialDesign:1.4:11:5
 MERGED from it.sephiroth.android.library.imagezoom:imagezoom:2.1.1:11:5
-MERGED from com.balysv.materialmenu:material-menu-abc:1.5.1:12:5
-MERGED from com.android.support:appcompat-v7:21.0.3:16:5
-MERGED from com.android.support:support-v4:21.0.3:16:5
-MERGED from com.balysv.materialmenu:material-menu:1.5.1:12:5
 	android:label
 		ADDED from AndroidManifest.xml:11:9
 	android:allowBackup
@@ -87,10 +83,6 @@ MERGED from com.android.support:support-v4:21.0.3:15:5
 MERGED from com.github.clans:fab:1.4.0:8:5
 MERGED from com.github.navasmdc:MaterialDesign:1.4:7:5
 MERGED from it.sephiroth.android.library.imagezoom:imagezoom:2.1.1:7:5
-MERGED from com.balysv.materialmenu:material-menu-abc:1.5.1:8:5
-MERGED from com.android.support:appcompat-v7:21.0.3:15:5
-MERGED from com.android.support:support-v4:21.0.3:15:5
-MERGED from com.balysv.materialmenu:material-menu:1.5.1:8:5
 	android:targetSdkVersion
 		INJECTED from AndroidManifest.xml:0:0
 		INJECTED from AndroidManifest.xml:0:0

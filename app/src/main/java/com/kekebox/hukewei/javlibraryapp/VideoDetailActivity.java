@@ -110,6 +110,7 @@ public class VideoDetailActivity extends ActionBarActivity {
                     startActivity(Intent.createChooser(sendIntent, "分享至.."));
                 }
             });
+            Toast.makeText(this,item.getId(),Toast.LENGTH_SHORT).show();
 
         }
     }

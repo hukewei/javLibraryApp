@@ -63,6 +63,11 @@ public class VideoInfoItem {
     }
 */
 
+
+    public String getId() {
+        return id;
+    }
+
     public ArrayList<String> getCategories() {
         return categories;
     }
