@@ -2,6 +2,9 @@ package com.kekebox.hukewei.javlibraryapp;
 
 import android.util.Log;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +26,7 @@ public class VideoInfoItem {
     private ArrayList<String> actors = new ArrayList<>();
     private String imageUrls;
     private String imagesThumbUrl;
+    private boolean isLiked = false;
 
 
 /*    {

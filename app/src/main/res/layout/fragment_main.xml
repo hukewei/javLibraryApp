@@ -7,6 +7,12 @@
     tools:context=".MainActivity$PlaceholderFragment">
 
     <TextView android:id="@+id/section_label" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="程序猿正在加班加点，敬请期待"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="#fff90095"
+        android:textSize="20dp" />
 
 </RelativeLayout>

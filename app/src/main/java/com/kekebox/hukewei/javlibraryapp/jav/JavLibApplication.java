@@ -17,23 +17,28 @@ public class JavLibApplication extends Application {
         NewReleases,
         NewEntries;
     }
-    public ArrayList<String> mostWantedIDs = new ArrayList<>();
+    public static ArrayList<String> mostWantedIDs = new ArrayList<>();
     public ArrayList<String> mostWantedOriginIDs = new ArrayList<>();
-    public ArrayList<String> mostWantedPendingIDs= new ArrayList<>();
-    public ArrayList<String> mostWantedLoadedIDs= new ArrayList<>();
-    public ArrayList<String> bestRatedIDs= new ArrayList<>();
+    public static ArrayList<String> mostWantedPendingIDs= new ArrayList<>();
+    public static ArrayList<String> mostWantedLoadedIDs= new ArrayList<>();
+    public static ArrayList<String> bestRatedIDs= new ArrayList<>();
     public ArrayList<String> bestRatedOriginIDs= new ArrayList<>();
 
-    public ArrayList<String> bestRatedPendingIDs= new ArrayList<>();
-    public ArrayList<String> bestRatedLoadedIDs= new ArrayList<>();
-    public ArrayList<String> newReleasesIDs= new ArrayList<>();
+    public static ArrayList<String> bestRatedPendingIDs= new ArrayList<>();
+    public static ArrayList<String> bestRatedLoadedIDs= new ArrayList<>();
+    public static ArrayList<String> newReleasesIDs= new ArrayList<>();
     public ArrayList<String> newReleasesOriginIDs= new ArrayList<>();
-    public ArrayList<String> newReleasesPendingIDs= new ArrayList<>();
-    public ArrayList<String> newReleasesLoadedIDs= new ArrayList<>();
-    public ArrayList<String> newEntriesIDs= new ArrayList<>();
+    public static ArrayList<String> newReleasesPendingIDs= new ArrayList<>();
+    public static ArrayList<String> newReleasesLoadedIDs= new ArrayList<>();
+    public static ArrayList<String> newEntriesIDs= new ArrayList<>();
     public ArrayList<String> newEntriesOriginIDs= new ArrayList<>();
-    public ArrayList<String> newEntriesPendingIDs= new ArrayList<>();
-    public ArrayList<String> newEntriesLoadedIDs= new ArrayList<>();
+    public static ArrayList<String> newEntriesPendingIDs= new ArrayList<>();
+    public static ArrayList<String> newEntriesLoadedIDs= new ArrayList<>();
+
+    public static ArrayList<VideoInfoItem> mostWantedItemList = new ArrayList<>();
+    public static ArrayList<VideoInfoItem> bestRatedItemList = new ArrayList<>();
+    public static ArrayList<VideoInfoItem> newReleasesItemList = new ArrayList<>();
+    public static ArrayList<VideoInfoItem> newEntriesItemList = new ArrayList<>();
 
 
     public static VideoInfoItem currentVideoItem;
@@ -48,6 +53,37 @@ public class JavLibApplication extends Application {
 
     public static void  setCurrentVideoItem(VideoInfoItem item) {
         currentVideoItem = item;
+    }
+    public static ArrayList<VideoInfoItem> getNewEntriesItemList() {
+        return newEntriesItemList;
+    }
+
+    public static void setNewEntriesItemList(ArrayList<VideoInfoItem> newEntriesItemList) {
+        JavLibApplication.newEntriesItemList = newEntriesItemList;
+    }
+
+    public static ArrayList<VideoInfoItem> getNewReleasesItemList() {
+        return newReleasesItemList;
+    }
+
+    public static void setNewReleasesItemList(ArrayList<VideoInfoItem> newReleasesItemList) {
+        JavLibApplication.newReleasesItemList = newReleasesItemList;
+    }
+
+    public static ArrayList<VideoInfoItem> getBestRatedItemList() {
+        return bestRatedItemList;
+    }
+
+    public static void setBestRatedItemList(ArrayList<VideoInfoItem> bestRatedItemList) {
+        JavLibApplication.bestRatedItemList = bestRatedItemList;
+    }
+
+    public static ArrayList<VideoInfoItem> getMostWantedItemList() {
+        return mostWantedItemList;
+    }
+
+    public static void setMostWantedItemList(ArrayList<VideoInfoItem> mostWantedItemList) {
+        JavLibApplication.mostWantedItemList = mostWantedItemList;
     }
 
     public ArrayList<String> getVideoIDs(VideoType type,int number) {
@@ -79,13 +115,14 @@ public class JavLibApplication extends Application {
             for (int i = 0; i <number ; i++) {
                 if (!pending_pool.contains(id_pool.get(i))) {
                     list_to_load.add(id_pool.get(i));
+                    pending_pool.add(id_pool.get(i));
                 }
             }
         }
         return list_to_load;
     }
 
-    public void onLoadSucceed(String video_id, VideoType type) {
+    public static void onLoadSucceed(String video_id, VideoType type) {
         switch (type) {
             case MostWanted:
                 mostWantedPendingIDs.remove(video_id);
@@ -110,7 +147,7 @@ public class JavLibApplication extends Application {
         }
     }
 
-    public void onLoadFailed(String video_id, VideoType type) {
+    public static void onLoadFailed(String video_id, VideoType type) {
         switch (type) {
             case MostWanted:
                 mostWantedPendingIDs.remove(video_id);
