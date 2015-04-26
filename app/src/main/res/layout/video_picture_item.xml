@@ -3,34 +3,38 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical">
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="85dp"
-        android:id="@+id/picture"
-        android:scaleType="centerCrop"
-        android:layout_margin="2dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="6dp" />
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="85dp"
-        android:orientation="vertical"
-        android:layout_margin="3dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp">
-        <TextView
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
+        <ImageView
+            android:layout_width="95dp"
+            android:layout_height="match_parent"
+            android:id="@+id/picture"
+            android:scaleType="centerCrop"
+            android:layout_margin="2dp" />
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/designation"
-            android:textSize="18dp"
-            android:textColor="@color/fuchsia"
-            android:layout_marginLeft="10dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/title"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="2dp" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="3dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/designation"
+                android:textSize="18dp"
+                android:textColor="@color/fuchsia"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="-5dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/title"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="-2dp" />
         </LinearLayout>
+        </LinearLayout>
+
 
 </LinearLayout>

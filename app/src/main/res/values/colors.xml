@@ -6,6 +6,8 @@
     <color name="fuchsia_light">#FFC0EB</color>
     <color name="red">#FF0000</color>
     <color name="silver">#C0C0C0</color>
+    <color name="silver_light">#ffd2d2d2</color>
+
     <color name="gray">#808080</color>
     <color name="olive">#808000</color>
     <color name="purple">#800080</color>
