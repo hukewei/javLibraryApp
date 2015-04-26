@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,15 +105,16 @@ public class VideoPictureAdapter extends ArrayAdapter implements Filterable {
         viewHolder.tvTitle.setText(item.getTitle());
         viewHolder.tvDesignation.setText(item.getDesignation());
         DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.placeholder)
-                .showImageForEmptyUri(R.drawable.placeholder)
-                .showImageOnFail(R.drawable.placeholder)
-                .cacheInMemory(true)
+                //.showImageOnLoading(R.drawable.placeholder_thumb)
+                //.showImageForEmptyUri(R.drawable.placeholder_thumb)
+                .showImageOnFail(R.drawable.placeholder_thumb)
+                //.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+                //.cacheInMemory(true)
                 .cacheOnDisk(true)
                 .build();
 
         if(MainActivity.ENABLE_THUMBS) {
-            ImageLoader.getInstance().displayImage(item.getImagesThumbUrl(), viewHolder.ivPicture);
+            ImageLoader.getInstance().displayImage(item.getImagesThumbUrl(), viewHolder.ivPicture, options);
 
         } else {
             viewHolder.ivPicture.setVisibility(View.GONE);

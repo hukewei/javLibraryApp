@@ -31,7 +31,7 @@ import java.util.logging.Handler;
  */
 public class SplashScreenActivity extends Activity {
 
-    private static final int MAX_LOAD_IDS_PER_CATEGORY = 100;
+    private static final int MAX_LOAD_IDS_PER_CATEGORY = 200;
     /** Duration of wait **/
     private int finished_task = 0;
     private int failed_task = 0;
@@ -237,7 +237,7 @@ public class SplashScreenActivity extends Activity {
 
 
                 } else {
-                    Toast.makeText(mContext,"无法连接到服务器，请稍后再试", Toast.LENGTH_SHORT);
+                    //Toast.makeText(mContext,"无法连接到服务器，请稍后再试", Toast.LENGTH_SHORT);
                     findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
                     ((TextView)findViewById(R.id.progress_text)).setText("无法连接到服务器，请稍后再试");
                 }

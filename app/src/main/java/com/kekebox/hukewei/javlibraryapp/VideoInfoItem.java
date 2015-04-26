@@ -27,6 +27,7 @@ public class VideoInfoItem {
     private String imageUrls;
     private String imagesThumbUrl;
     private boolean isLiked = false;
+    private static final boolean USE_EXTERNAL_THUMBS = true;
 
 
 /*    {
@@ -108,8 +109,12 @@ public class VideoInfoItem {
         this.imageUrls = jso.getJSONArray("image_urls").getString(0);
         Log.d(TAG, "image url = " + this.imageUrls);
         Log.d(TAG, "web url = " + this.webUrl);
-        this.imagesThumbUrl = jso.getJSONArray("images").getJSONObject(0).getString("path");
-        this.imagesThumbUrl = this.imagesThumbUrl.replace("full", "http://vpn.kekebox.com/javlib/small");
+        if(USE_EXTERNAL_THUMBS) {
+            this.imagesThumbUrl = this.imageUrls.replace("pl.jpg", "ps.jpg");
+        } else {
+            this.imagesThumbUrl = jso.getJSONArray("images").getJSONObject(0).getString("path");
+            this.imagesThumbUrl = this.imagesThumbUrl.replace("full", "http://vpn.kekebox.com/javlib/small");
+        }
         JSONArray categories = jso.getJSONArray("category");
         for(int i = 0, count = categories.length(); i< count; i++)
         {

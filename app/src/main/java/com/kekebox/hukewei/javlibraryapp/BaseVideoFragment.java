@@ -53,8 +53,6 @@ import java.util.Iterator;
 
 public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    private TextView txtuser;
-    private TextView locations;
     SwipeRefreshLayout mSwipeRefreshLayout;
     ListView myListView;
     ArrayList<String> pendingList;
@@ -62,7 +60,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
     int nbTaskOnGoing = 0;
     int nbTaskLoaded = 0;
     static final int NB_FIRST_LOAD_TASK = 20;
-    static final int NB_TASK_LOAD_SCROLL = 5;
+    static final int NB_TASK_LOAD_SCROLL = 10;
 
 
 
