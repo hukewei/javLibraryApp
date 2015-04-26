@@ -1,7 +1,7 @@
 # javLibraryApp
 ## Introduction
 
-This an Android Application retrieves videos information using [JavLibraryRESTful](https://github.com/hukewei/javLibraryRESTful) APIs.
+This an Android Application retrieves videos information of JavLibrary using [JavLibraryRESTful](https://github.com/hukewei/javLibraryRESTful) APIs. And provide more convenient user experience compare to the web version on Mobile end.
 
 
 ## Download
