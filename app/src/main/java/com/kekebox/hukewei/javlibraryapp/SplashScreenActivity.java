@@ -36,7 +36,7 @@ public class SplashScreenActivity extends Activity {
     private int finished_task = 0;
     private int failed_task = 0;
     private int succeed_task = 0;
-    private static final int TOTAL_TASK = 4;
+    private static final int TOTAL_TASK = 5;
     int finishedProgressTask = 0;
     static final int NB_FIRST_LOAD_TASK = 20;
     private static final int PROGRESS_TASK = NB_FIRST_LOAD_TASK;
@@ -217,23 +217,18 @@ public class SplashScreenActivity extends Activity {
             } else {
                 failed_task++;
             }
-            if(finished_task == TOTAL_TASK) {
-                if(succeed_task == TOTAL_TASK) {
+            DecimalFormat df = new DecimalFormat("#");
+            ((TextView)findViewById(R.id.progress_text)).setText(String.valueOf(df.format(100.0 * finished_task / TOTAL_TASK)) + " %");
+            if(finished_task == TOTAL_TASK -1) {
+                if(succeed_task == TOTAL_TASK - 1) {
                     for (JavLibApplication.VideoType type : JavLibApplication.VideoType.values()) {
                         if(type == JavLibApplication.VideoType.MostWanted) {
-                            final ArrayList<String> videos_to_load = ((JavLibApplication) getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
-                            for (int i = 0; i < videos_to_load.size(); i++) {
-                                VideoDetailRetrieveTask atask = new VideoDetailRetrieveTask(SplashScreenActivity.this, videos_to_load.get(i), type);
-                                atask.execute((Void) null);
+                            ArrayList<String> videos_to_load = ((JavLibApplication) getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
+                            new VideoDetailMultipleRetrieveTask(SplashScreenActivity.this, videos_to_load, type).execute((Void) null);
 
-                            }
                         }
                     }
-                    if(finishedProgressTask == PROGRESS_TASK) {
-                        Intent mainIntent = new Intent(SplashScreenActivity.this, MainActivity.class);
-                        SplashScreenActivity.this.startActivity(mainIntent);
-                        SplashScreenActivity.this.finish();
-                    }
+
 
 
                 } else {
@@ -250,4 +245,125 @@ public class SplashScreenActivity extends Activity {
             //mMileAccrualHistoryTask = null;
         }
     }
+
+    public class VideoDetailMultipleRetrieveTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String TAG = "VideoDetailRetrieveTask";
+        private ArrayList<String> pendingList;
+        private ArrayList<VideoInfoItem> VideoItemList;
+        Context mContext;
+        String mFeedURL;
+        JavLibApplication.VideoType mType;
+        String mEncodedVideoId;
+        ArrayList<String> ids;
+        boolean endOfList = false;
+
+
+        public VideoDetailMultipleRetrieveTask(Context context,  ArrayList<String> ids, JavLibApplication.VideoType type) {
+            switch (type) {
+                case MostWanted:
+                    mFeedURL = getString(R.string.most_wanted_feed_url);
+                    VideoItemList = JavLibApplication.getMostWantedItemList();
+                    pendingList = ((JavLibApplication)getApplication()).getMostWantedPendingIDs();
+
+                    break;
+                case BestRated:
+                    mFeedURL = getString(R.string.best_rated_feed_url);
+                    VideoItemList = JavLibApplication.getBestRatedItemList();
+                    pendingList = ((JavLibApplication)getApplication()).getBestRatedPendingIDs();
+
+                    break;
+                case NewEntries:
+
+                    VideoItemList = JavLibApplication.getNewEntriesItemList();
+                    pendingList = ((JavLibApplication)getApplication()).getNewEntriesPendingIDs();
+
+                    mFeedURL = getString(R.string.new_entries_feed_url);
+                    break;
+                case NewReleases:
+                    VideoItemList = JavLibApplication.getNewReleasesItemList();
+                    pendingList = ((JavLibApplication)getApplication()).getNewReleasesPendingIDs();
+
+                    mFeedURL = getString(R.string.new_releases_feed_url);
+                    break;
+            }
+
+            this.ids = ids;
+            mContext = context;
+            mType = type;
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            if(ids.isEmpty()) {
+                endOfList = true;
+                return false;
+
+            }
+            mEncodedVideoId = ids.get(0);
+            pendingList.add(ids.get(0));
+            for (int i = 1; i < ids.size(); i++) {
+                pendingList.add(ids.get(i));
+                mEncodedVideoId += "@" + ids.get(i);
+            }
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+
+            try {
+                HttpGet get = new HttpGet(mFeedURL+ "/" + mEncodedVideoId);
+                response = client.execute(get);
+
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    JSONArray results =  new JSONArray(json_string);
+                    if (results.length()>0) {
+                        for (int i = 0; i <results.length(); i++) {
+                            final VideoInfoItem currentItem = new VideoInfoItem(results.getJSONObject(i));
+                            VideoItemList.add(currentItem);
+
+                        }
+
+                        return true;
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            //Things to do when Task finished with success or not
+            //mMileAccrualHistoryTask = null;
+            finished_task++;
+            DecimalFormat df = new DecimalFormat("#");
+            ((TextView)findViewById(R.id.progress_text)).setText(String.valueOf(df.format(100.0 * finished_task / TOTAL_TASK)) + " %");
+            if (success) {
+                for (int i = 0; i < ids.size(); i++) {
+                    JavLibApplication.onLoadSucceed(ids.get(i), mType);
+                }
+
+            } else {
+                for (int i = 0; i < ids.size(); i++) {
+                    JavLibApplication.onLoadFailed(ids.get(i), mType);
+                }
+            }
+            Intent mainIntent = new Intent(SplashScreenActivity.this, MainActivity.class);
+            startActivity(mainIntent);
+            finish();
+
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            for (int i = 0; i < ids.size(); i++) {
+                JavLibApplication.onLoadFailed(ids.get(i), mType);
+            }
+            //mMileAccrualHistoryTask = null;
+        }
+    }
+
 }
