@@ -1,6 +1,7 @@
 package com.kekebox.hukewei.javlibraryapp.jav;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.kekebox.hukewei.javlibraryapp.VideoInfoItem;
 
@@ -118,6 +119,8 @@ public class JavLibApplication extends Application {
                     pending_pool.add(id_pool.get(i));
                 }
             }
+        } else {
+            Log.d("BasicOfferFragment", "id pool is empty");
         }
         return list_to_load;
     }

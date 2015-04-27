@@ -50,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
+
 
 public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -61,6 +63,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
     int nbTaskLoaded = 0;
     static final int NB_FIRST_LOAD_TASK = 20;
     static final int NB_TASK_LOAD_SCROLL = 10;
+    SmoothProgressBar spb;
 
 
 
@@ -97,6 +100,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         type = JavLibApplication.VideoType.valueOf(getArguments().getString(ARG_VIDEO_TYPE));
         LinearLayout llLayout    = (LinearLayout)    inflater.inflate(R.layout.fragment_base_view, container, false);
         pb = (ProgressBar) llLayout.findViewById(R.id.video_detail_progress);
+        spb = (SmoothProgressBar) llLayout.findViewById(R.id.smooth_progressbar);
         mSwipeRefreshLayout = (SwipeRefreshLayout) llLayout.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -140,7 +144,9 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             public void onLoadMore(int page, int totalItemsCount) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to your AdapterView
+                Log.d(TAG, "onLoadMore");
                 final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
+                Log.d(TAG,"VIDEOS TO LOADS = " + videos_to_load);
                 new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
 //                ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
 //                for (int i = 0; i < videos_to_load.size(); i++) {
@@ -328,15 +334,21 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    if(spb != null)
+                    spb.progressiveStart();
+                }
+            });
             if(ids.isEmpty()) {
                 endOfList = true;
                 return false;
 
             }
             mEncodedVideoId = ids.get(0);
-            pendingList.add(ids.get(0));
+            //pendingList.add(ids.get(0));
             for (int i = 1; i < ids.size(); i++) {
-                pendingList.add(ids.get(i));
+                //pendingList.add(ids.get(i));
                 mEncodedVideoId += "@" + ids.get(i);
             }
             nbTaskOnGoing++;
@@ -375,6 +387,14 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         protected void onPostExecute(final Boolean success) {
             //Things to do when Task finished with success or not
             //mMileAccrualHistoryTask = null;
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    if(spb != null)
+                    spb.progressiveStop();
+                }
+            }, 1200);
+
             if (success) {
                 for (int i = 0; i < ids.size(); i++) {
                     JavLibApplication.onLoadSucceed(ids.get(i), mType);
@@ -390,10 +410,8 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     Toast.makeText(mContext, "载入失败，请重试！", Toast.LENGTH_SHORT).show();
                 }
             }
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
+            new Handler().postDelayed(new Runnable() {
                 public void run() {
-
                     myListView.setVisibility(View.VISIBLE);
                     pb.setVisibility(View.GONE);
 

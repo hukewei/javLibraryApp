@@ -1,25 +1,23 @@
 package com.kekebox.hukewei.javlibraryapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -33,6 +31,7 @@ public class MainActivity extends ActionBarActivity
 
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final boolean ENABLE_THUMBS = true;
+    private Menu menu;
 
 
     /**
@@ -49,6 +48,7 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupUI(findViewById(R.id.drawer_layout));
 
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -63,6 +63,42 @@ public class MainActivity extends ActionBarActivity
 
     }
 
+    public void setupUI(View view) {
+
+        //Set up touch listener for non-title_text box views to hide keyboard.
+        if(!(view instanceof EditText)) {
+
+            view.setOnTouchListener(new View.OnTouchListener() {
+
+                public boolean onTouch(View v, MotionEvent event) {
+                    hideKeyboard();
+                    return false;
+                }
+
+            });
+        }
+
+        //If a layout container, iterate over children and seed recursion.
+        if (view instanceof ViewGroup) {
+
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+
+                View innerView = ((ViewGroup) view).getChildAt(i);
+
+                setupUI(innerView);
+            }
+        }
+    }
+
+    private void hideKeyboard() {
+        // Check if no view has focus:
+        View view = getCurrentFocus();
+        if ( view != null) {
+            InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
+
 
 
 
@@ -74,7 +110,13 @@ public class MainActivity extends ActionBarActivity
         if (position == 0) {
             next_fragment = new CategoryFragment();
 
-        } else {
+        } else if(position == 2){
+            if(JavUser.getCurrentUser().isLogin()) {
+                next_fragment = PlaceholderFragment.newInstance(position + 1);
+            } else {
+                next_fragment = new LoginFragment();
+            }
+        } else{
             next_fragment = PlaceholderFragment.newInstance(position + 1);
         }
         fragmentManager.beginTransaction()
@@ -112,6 +154,8 @@ public class MainActivity extends ActionBarActivity
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
             restoreActionBar();
+            this.menu = menu;
+            updateMenuTitles();
             return true;
         }
         return super.onCreateOptionsMenu(menu);
@@ -132,9 +176,26 @@ public class MainActivity extends ActionBarActivity
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
             return true;
+        } else if (id == R.id.action_signInUp) {
+            if(JavUser.getCurrentUser().isLogin()) {
+                JavUser.getCurrentUser().Logout();
+            }
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, new LoginFragment())
+                    .commit();
         }
+        updateMenuTitles();
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateMenuTitles() {
+        MenuItem bedMenuItem = menu.findItem(R.id.action_signInUp);
+        if (JavUser.getCurrentUser().isLogin()) {
+            bedMenuItem.setTitle("注销");
+        } else {
+            bedMenuItem.setTitle("登陆");
+        }
     }
 
     /**

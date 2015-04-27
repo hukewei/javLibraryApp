@@ -301,9 +301,9 @@ public class SplashScreenActivity extends Activity {
 
             }
             mEncodedVideoId = ids.get(0);
-            pendingList.add(ids.get(0));
+            //pendingList.add(ids.get(0));
             for (int i = 1; i < ids.size(); i++) {
-                pendingList.add(ids.get(i));
+                //pendingList.add(ids.get(i));
                 mEncodedVideoId += "@" + ids.get(i);
             }
             HttpClient client = new DefaultHttpClient();
