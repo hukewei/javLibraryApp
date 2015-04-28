@@ -31,5 +31,7 @@ dependencies {
     compile 'it.sephiroth.android.library.imagezoom:imagezoom:+'
     compile files('libs/universal-image-loader-1.9.3.jar')
     compile 'com.github.castorflex.smoothprogressbar:library:1.1.0'
+    compile 'com.beardedhen:androidbootstrap:+'
+    compile 'com.jmpergar:AwesomeText:1.0.0'
 
 }

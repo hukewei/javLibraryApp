@@ -10,7 +10,7 @@ public class JavUser {
     private String HashedPassword;
     private String UserId;
     private boolean isLogin;
-    private ArrayList<String> FavoriteActors;
+    private ArrayList<String> FavoriteActors = new ArrayList<>();
     private ArrayList<String> FavoriteVideos;
     private ArrayList<String> WatchedVideos;
     private static JavUser currentUser;
