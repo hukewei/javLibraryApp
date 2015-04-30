@@ -194,7 +194,8 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
 
 
             if (success) {
-                mAdapter.notifyDataSetChanged();
+                //mAdapter.notifyDataSetChanged();
+                //fixme inform current fragment
             } else {
                 Toast.makeText(getActivity(), "刷新失败，请稍后再试", Toast.LENGTH_SHORT).show();
             }

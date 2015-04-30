@@ -3,6 +3,7 @@ package com.kekebox.hukewei.javlibraryapp.jav;
 import android.app.Application;
 import android.util.Log;
 
+import com.kekebox.hukewei.javlibraryapp.JavUser;
 import com.kekebox.hukewei.javlibraryapp.VideoInfoItem;
 
 import java.util.ArrayList;
@@ -16,7 +17,11 @@ public class JavLibApplication extends Application {
         MostWanted,
         BestRated,
         NewReleases,
-        NewEntries;
+        NewEntries,
+        FavoriteVideos,
+        WantedVideos,
+        WatchedVideos,
+        FavoriteActors;
     }
     public static ArrayList<String> mostWantedIDs = new ArrayList<>();
     public ArrayList<String> mostWantedOriginIDs = new ArrayList<>();
@@ -90,31 +95,56 @@ public class JavLibApplication extends Application {
     public ArrayList<String> getVideoIDs(VideoType type,int number) {
         ArrayList<String> list_to_load = new ArrayList<>();
         ArrayList<String> pending_pool = null;
+        ArrayList<String> loaded_pool = null;
         ArrayList<String> id_pool = null;
         switch (type) {
             case MostWanted:
                 pending_pool = mostWantedPendingIDs;
                 id_pool = mostWantedIDs;
+                loaded_pool = mostWantedLoadedIDs;
                 break;
             case BestRated:
                 pending_pool = bestRatedPendingIDs;
                 id_pool = bestRatedIDs;
+                loaded_pool = bestRatedLoadedIDs;
                 break;
             case NewReleases:
                 pending_pool = newReleasesPendingIDs;
                 id_pool = newReleasesIDs;
+                loaded_pool = newReleasesLoadedIDs;
                 break;
             case NewEntries:
                 pending_pool = newEntriesPendingIDs;
                 id_pool = newEntriesIDs;
+                loaded_pool = newEntriesLoadedIDs;
+                break;
+            case FavoriteVideos:
+                pending_pool = JavUser.getCurrentUser().getFavoriteVideosPendingIDs();
+                id_pool = JavUser.getCurrentUser().getFavoriteVideos();
+                loaded_pool = JavUser.getCurrentUser().getLoadedFavoriteVideos();
+                break;
+            case WantedVideos:
+                pending_pool = JavUser.getCurrentUser().getWantedVideosPendingIDs();
+                id_pool = JavUser.getCurrentUser().getWantedVideos();
+                loaded_pool = JavUser.getCurrentUser().getLoadedWantedVideos();
+                break;
+            case WatchedVideos:
+                pending_pool = JavUser.getCurrentUser().getWatchedVideosPendingIDs();
+                id_pool = JavUser.getCurrentUser().getWatchedVideos();
+                loaded_pool = JavUser.getCurrentUser().getLoadedWatchedVideos();
                 break;
         }
         if(!id_pool.isEmpty())  {
-            if(id_pool.size()<number) {
-                number = id_pool.size();
+            Log.d("BasicOfferFragment", "ID pool size = " + id_pool.size());
+            if(id_pool.size() - loaded_pool.size()<number) {
+                number = id_pool.size() - loaded_pool.size();
             }
-            for (int i = 0; i <number ; i++) {
-                if (!pending_pool.contains(id_pool.get(i))) {
+            Log.d("BasicOfferFragment", "number final = " + number);
+            for (int i = 0;  ; i++) {
+                if(i == id_pool.size() || list_to_load.size() == number) {
+                    break;
+                }
+                if (!pending_pool.contains(id_pool.get(i)) && !loaded_pool.contains(id_pool.get(i))) {
                     list_to_load.add(id_pool.get(i));
                     pending_pool.add(id_pool.get(i));
                 }
@@ -130,22 +160,37 @@ public class JavLibApplication extends Application {
             case MostWanted:
                 mostWantedPendingIDs.remove(video_id);
                 mostWantedLoadedIDs.add(video_id);
-                mostWantedIDs.remove(video_id);
+                //mostWantedIDs.remove(video_id);
                 break;
             case BestRated:
                 bestRatedPendingIDs.remove(video_id);
                 bestRatedLoadedIDs.add(video_id);
-                bestRatedIDs.remove(video_id);
+                //bestRatedIDs.remove(video_id);
                 break;
             case NewReleases:
                 newReleasesPendingIDs.remove(video_id);
                 newReleasesLoadedIDs.add(video_id);
-                newReleasesIDs.remove(video_id);
+                //newReleasesIDs.remove(video_id);
                 break;
             case NewEntries:
                 newEntriesPendingIDs.remove(video_id);
                 newEntriesLoadedIDs.add(video_id);
-                newEntriesIDs.remove(video_id);
+                //newEntriesIDs.remove(video_id);
+                break;
+            case FavoriteVideos:
+                JavUser.getCurrentUser().getFavoriteVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getLoadedFavoriteVideos().add(video_id);
+                //newEntriesIDs.remove(video_id);
+                break;
+            case WantedVideos:
+                JavUser.getCurrentUser().getWantedVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getLoadedWantedVideos().add(video_id);
+                //newEntriesIDs.remove(video_id);
+                break;
+            case WatchedVideos:
+                JavUser.getCurrentUser().getWatchedVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getLoadedWatchedVideos().add(video_id);
+                //newEntriesIDs.remove(video_id);
                 break;
         }
     }
@@ -163,6 +208,15 @@ public class JavLibApplication extends Application {
                 break;
             case NewEntries:
                 newEntriesPendingIDs.remove(video_id);
+                break;
+            case FavoriteVideos:
+                JavUser.getCurrentUser().getFavoriteVideosPendingIDs().remove(video_id);
+                break;
+            case WantedVideos:
+                JavUser.getCurrentUser().getWantedVideosPendingIDs().remove(video_id);
+                break;
+            case WatchedVideos:
+                JavUser.getCurrentUser().getWatchedVideosPendingIDs().remove(video_id);
                 break;
         }
     }

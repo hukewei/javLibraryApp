@@ -111,19 +111,31 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         switch (type) {
             case MostWanted:
                 VideoItemList = JavLibApplication.getMostWantedItemList();
-                pendingList = ((JavLibApplication)getActivity().getApplication()).getMostWantedPendingIDs();
+                //pendingList = ((JavLibApplication)getActivity().getApplication()).getMostWantedPendingIDs();
                 break;
             case BestRated:
                 VideoItemList = JavLibApplication.getBestRatedItemList();
-                pendingList = ((JavLibApplication)getActivity().getApplication()).getBestRatedPendingIDs();
+                //pendingList = ((JavLibApplication)getActivity().getApplication()).getBestRatedPendingIDs();
                 break;
             case NewEntries:
                 VideoItemList = JavLibApplication.getNewEntriesItemList();
-                pendingList = ((JavLibApplication)getActivity().getApplication()).getNewEntriesPendingIDs();
+                //pendingList = ((JavLibApplication)getActivity().getApplication()).getNewEntriesPendingIDs();
                 break;
             case NewReleases:
                 VideoItemList = JavLibApplication.getNewReleasesItemList();
-                pendingList = ((JavLibApplication)getActivity().getApplication()).getNewReleasesPendingIDs();
+                //pendingList = ((JavLibApplication)getActivity().getApplication()).getNewReleasesPendingIDs();
+                break;
+            case FavoriteVideos:
+                VideoItemList = JavUser.getCurrentUser().getFavoriteVideosItemList();
+                //pendingList = JavUser.getCurrentUser().getFavoriteVideosPendingIDs();
+                break;
+            case WantedVideos:
+                VideoItemList = JavUser.getCurrentUser().getWantedVideosItemList();
+                //pendingList = JavUser.getCurrentUser().getWantedVideosPendingIDs();
+                break;
+            case WatchedVideos:
+                VideoItemList = JavUser.getCurrentUser().getWatchedVideosItemList();
+                //pendingList = JavUser.getCurrentUser().getWantedVideosPendingIDs();
                 break;
         }
 
@@ -187,15 +199,18 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
     @Override
     public void onRefresh() {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-
-                Toast.makeText(getActivity(), "别着急，暂时没有新片哦！", Toast.LENGTH_LONG).show();
-                mSwipeRefreshLayout.setRefreshing(false);
-
-            }
-        }, 2000);
+        myListView.invalidateViews();
+        mAdapter.notifyDataSetChanged();
+//        Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            public void run() {
+//
+//                Toast.makeText(getActivity(), "别着急，暂时没有新片哦！", Toast.LENGTH_LONG).show();
+//                mSwipeRefreshLayout.setRefreshing(false);
+//
+//            }
+//        }, 2000);
+        mSwipeRefreshLayout.setRefreshing(false);
 
     }
 //
@@ -230,6 +245,8 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 case NewReleases:
                     mFeedURL = getString(R.string.new_releases_feed_url);
                     break;
+                default:
+                    mFeedURL = getString(R.string.all_videos_feed_url);
             }
             mContext = context;
             mType = type;
@@ -325,6 +342,8 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 case NewReleases:
                     mFeedURL = getString(R.string.new_releases_feed_url);
                     break;
+                default:
+                    mFeedURL = getString(R.string.all_videos_feed_url);
             }
             this.ids = ids;
             mContext = context;
@@ -346,9 +365,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
             }
             mEncodedVideoId = ids.get(0);
-            //pendingList.add(ids.get(0));
             for (int i = 1; i < ids.size(); i++) {
-                //pendingList.add(ids.get(i));
                 mEncodedVideoId += "@" + ids.get(i);
             }
             nbTaskOnGoing++;
@@ -369,11 +386,6 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                             VideoItemList.add(currentItem);
 
                         }
-                        getActivity().runOnUiThread(new Runnable() {
-                            public void run() {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
                         return true;
                     }
                 }
@@ -399,6 +411,8 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 for (int i = 0; i < ids.size(); i++) {
                     JavLibApplication.onLoadSucceed(ids.get(i), mType);
                 }
+                mAdapter.notifyDataSetChanged();
+                myListView.invalidateViews();
 
             } else {
                 for (int i = 0; i < ids.size(); i++) {

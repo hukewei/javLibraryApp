@@ -14,23 +14,24 @@ public class UserTabsPagerAdapter extends FragmentStatePagerAdapter {
     public UserTabsPagerAdapter(FragmentManager fm) {
         super(fm);
     }
-    String[] tabs = {"收藏影片", "想看", "已看过", "关注艺人"};
+    String[] tabs = {"收藏影片", "想看", "已看过"};
+    //String[] tabs = {"收藏影片", "想看", "已看过", "关注艺人"};
     @Override
     public Fragment getItem(int index) {
 
         switch (index) {
             case 0:
                 // Most wanted fragment activity
-                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.MostWanted.toString());
+                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.FavoriteVideos.toString());
             case 1:
                 // Best rated fragment activity
-                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.BestRated.toString());
+                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.WantedVideos.toString());
             case 2:
                 // New Releases fragment activity
-                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.NewReleases.toString());
+                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.WatchedVideos.toString());
             case 3:
                 //  New entries fragment activity
-                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.NewEntries.toString());
+                return BaseVideoFragment.newInstance(JavLibApplication.VideoType.FavoriteActors.toString());
         }
 
         return null;

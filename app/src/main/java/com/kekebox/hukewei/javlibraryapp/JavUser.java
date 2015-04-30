@@ -1,6 +1,8 @@
 package com.kekebox.hukewei.javlibraryapp;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by hukewei on 28/04/15.
@@ -15,7 +17,15 @@ public class JavUser {
     private ArrayList<String> WantedVideos = new ArrayList<>();
     private ArrayList<String> WatchedVideos = new ArrayList<>();
     private static JavUser currentUser;
-
+    private ArrayList<VideoInfoItem> favoriteVideosItemList = new ArrayList<>();
+    private ArrayList<String> favoriteVideosPendingIDs = new ArrayList<>();
+    private ArrayList<VideoInfoItem> wantedVideosItemList = new ArrayList<>();
+    private ArrayList<String> wantedVideosPendingIDs = new ArrayList<>();
+    private ArrayList<String> loadedFavoriteVideos= new ArrayList<>();
+    private ArrayList<String>  loadedWantedVideos= new ArrayList<>();
+    private ArrayList<String> watchedVideosPendingIDs= new ArrayList<>();
+    private ArrayList<String> loadedWatchedVideos= new ArrayList<>();
+    private ArrayList<VideoInfoItem> watchedVideosItemList= new ArrayList<>();
 
 
     public static JavUser getCurrentUser() {
@@ -96,5 +106,39 @@ public class JavUser {
     }
 
 
+    public ArrayList<VideoInfoItem> getFavoriteVideosItemList() {
+        return favoriteVideosItemList;
+    }
 
+    public ArrayList<String> getFavoriteVideosPendingIDs() {
+        return favoriteVideosPendingIDs;
+    }
+
+    public ArrayList<VideoInfoItem> getWantedVideosItemList() {
+        return wantedVideosItemList;
+    }
+
+    public ArrayList<String> getWantedVideosPendingIDs() {
+        return wantedVideosPendingIDs;
+    }
+
+    public ArrayList<String> getLoadedFavoriteVideos() {
+        return loadedFavoriteVideos;
+    }
+
+    public ArrayList<String>  getLoadedWantedVideos() {
+        return loadedWantedVideos;
+    }
+
+    public ArrayList<String> getWatchedVideosPendingIDs() {
+        return watchedVideosPendingIDs;
+    }
+
+    public ArrayList<String> getLoadedWatchedVideos() {
+        return loadedWatchedVideos;
+    }
+
+    public ArrayList<VideoInfoItem> getWatchedVideosItemList() {
+        return watchedVideosItemList;
+    }
 }

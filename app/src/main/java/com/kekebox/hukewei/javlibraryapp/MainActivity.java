@@ -112,7 +112,8 @@ public class MainActivity extends ActionBarActivity
 
         } else if(position == 2){
             if(JavUser.getCurrentUser().isLogin()) {
-                next_fragment = PlaceholderFragment.newInstance(position + 1);
+                updateMenuTitles();
+                next_fragment = new UserInfoFragment();
             } else {
                 next_fragment = new LoginFragment();
             }
@@ -191,6 +192,9 @@ public class MainActivity extends ActionBarActivity
 
     public void updateMenuTitles() {
         MenuItem bedMenuItem = menu.findItem(R.id.action_signInUp);
+        if(bedMenuItem == null) {
+            return;
+        }
         if (JavUser.getCurrentUser().isLogin()) {
             bedMenuItem.setTitle("注销");
         } else {
