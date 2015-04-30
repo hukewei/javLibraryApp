@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -19,6 +21,19 @@ import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 
@@ -188,22 +203,29 @@ public class VideoDetailActivity extends ActionBarActivity {
     }
 
     private  void onClickTagAction(String text, Context context) {
+        if(!JavUser.getCurrentUser().isLogin()) {
+            return;
+        }
         String new_text = "";
+        String action_type;
+        String actor;
         if(text.startsWith("#")) {
             //to unliked action
-            String actor = text.replace("#", "");
+            actor = text.replace("#", "");
             new_text = actors.getText().toString().replace(text, "@"+actor);
-            JavUser.getCurrentUser().getFavoriteActors().remove(actor);
-            Toast.makeText(context, "已取消关注 " + actor, Toast.LENGTH_SHORT).show();
+            //JavUser.getCurrentUser().getFavoriteActors().remove(actor);
+            //Toast.makeText(context, "已取消关注 " + actor, Toast.LENGTH_SHORT).show();
+            action_type = "PULL";
 
         } else {
             //to like action
-            String actor = text.replace("@", "");
+            actor = text.replace("@", "");
             new_text = actors.getText().toString().replace(text, "#"+actor);
-            JavUser.getCurrentUser().getFavoriteActors().add(actor);
-            Toast.makeText(context, "已关注 " + actor, Toast.LENGTH_SHORT).show();
+            //JavUser.getCurrentUser().getFavoriteActors().add(actor);
+            //Toast.makeText(context, "已关注 " + actor, Toast.LENGTH_SHORT).show();
+            action_type = "PUSH";
         }
-        awesomeTextViewHandler.setText(new_text);
+        new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(), "favorite_actors", action_type,actor,new_text).execute((Void) null);
     }
 
 
@@ -211,5 +233,91 @@ public class VideoDetailActivity extends ActionBarActivity {
         final float scale = ctx.getResources().getDisplayMetrics().density;
         int px = (int) (dips * scale + 0.5f);
         return px;
+    }
+
+    public class PreferenceUpdateTask extends AsyncTask<Void, Void, Boolean> {
+
+        private static final String TAG = "PreferenceUpdateTask";
+        private final String userID;
+        private final String PreferenceType;
+        private final String ActionType;
+        private final String Content;
+        private final String Extra;
+
+
+        PreferenceUpdateTask(String uid, String preference_type, String action_type, String data, String extra) {
+            userID = uid;
+            PreferenceType = preference_type;
+            ActionType = action_type;
+            Content = data;
+            Extra = extra;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+            JSONObject json = new JSONObject();
+
+            try {
+
+                HttpPut put = new HttpPut(getString(R.string.preference_url) + userID + "?action="+ActionType);
+                json.put(PreferenceType, Content);
+                StringEntity se = new StringEntity( json.toString(),HTTP.UTF_8);
+                Log.i(TAG, json.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                put.setHeader("Accept-Charset","utf-8");
+                put.setEntity(se);
+                response = client.execute(put);
+
+
+                /*Checking response */
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    Log.d(TAG, "response = " + json_string);
+                    JSONObject jsonObj = new JSONObject(json_string);
+                    Iterator<String> keys= jsonObj.keys();
+                    while (keys.hasNext())
+                    {
+                        String keyValue = keys.next();
+                        if(keyValue.equals("_id")) {
+                            return true;
+                        }
+
+                    }
+                    Log.i(TAG, json_string);
+                } else {
+                    return false;
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+
+            if (success) {
+                awesomeTextViewHandler.setText(Extra);
+                if(ActionType =="PUSH") {
+                    Toast.makeText(VideoDetailActivity.this, "已关注 " + Content, Toast.LENGTH_SHORT).show();
+                    JavUser.getCurrentUser().getFavoriteActors().add(Content);
+
+                } else {
+                    Toast.makeText(VideoDetailActivity.this, "已取消关注 " + Content, Toast.LENGTH_SHORT).show();
+                    JavUser.getCurrentUser().getFavoriteActors().remove(Content);
+                }
+            } else {
+                Toast.makeText(VideoDetailActivity.this, "跟新失败，请稍后再试", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+        }
     }
 }

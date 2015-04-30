@@ -313,9 +313,10 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
                         String valueString = jsonObj.getString(keyValue);
                         Log.i(TAG, keyValue);
                         Log.i(TAG, valueString);
-                        if(keyValue.equals("$id")) {
-                            if(valueString == "") {
+                        if(keyValue.contains("id")) {
+                            if(valueString.equals("ERROR")) {
                                 //login failed
+                                Log.d(TAG, "Login fail");
                                 mCurrentUser.setLogin(false);
                                 return false;
                             } else {
@@ -344,7 +345,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
 
             if (success) {
                 ((MainActivity)getActivity()).updateMenuTitles();
-                MainActivity.PlaceholderFragment next_fragment = MainActivity.PlaceholderFragment.newInstance(3);
+                Fragment next_fragment = new UserInfoFragment();
                 getFragmentManager().beginTransaction()
                         .replace(R.id.container, next_fragment)
                         .commit();

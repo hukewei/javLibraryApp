@@ -11,8 +11,9 @@ public class JavUser {
     private String UserId;
     private boolean isLogin;
     private ArrayList<String> FavoriteActors = new ArrayList<>();
-    private ArrayList<String> FavoriteVideos;
-    private ArrayList<String> WatchedVideos;
+    private ArrayList<String> FavoriteVideos = new ArrayList<>();
+    private ArrayList<String> WantedVideos = new ArrayList<>();
+    private ArrayList<String> WatchedVideos = new ArrayList<>();
     private static JavUser currentUser;
 
 
@@ -81,7 +82,19 @@ public class JavUser {
         WatchedVideos = watchedVideos;
     }
 
+
+    public ArrayList<String> getWantedVideos() {
+        return WantedVideos;
+    }
+
+    public void setWantedVideos(ArrayList<String> wantedVideos) {
+        WantedVideos = wantedVideos;
+    }
+
     public void Logout() {
         isLogin = false;
     }
+
+
+
 }

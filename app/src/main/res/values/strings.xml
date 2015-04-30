@@ -23,6 +23,7 @@
     <string name="action_sign_in">登陆或注册</string>
     <string name="authentication_url">http://aws-ec2.kekebox.com/javLibraryRESTful/javLibrary/members</string>
     <string name="action_signInUp">注册/登陆</string>
+    <string name="preference_url">http://aws-ec2.kekebox.com/javLibraryRESTful/javLibrary/membersPreference/</string>
 
 
 </resources>
