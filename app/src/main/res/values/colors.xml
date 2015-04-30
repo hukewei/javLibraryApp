@@ -19,4 +19,11 @@
     <color name="blue">#0000FF</color>
     <color name="navy">#000080</color>
     <color name="black">#000000</color>
+    <color name="bbutton_danger">#FD3F92</color>
+    <color name="bbutton_danger_edge">#fffd2d82</color>
+    <color name="bbutton_danger_disabled">#82fd3f92</color>
+    <color name="bbutton_danger_disabled_edge">#82f33592</color>
+    <color name="bbutton_danger_pressed">#fff63b8e</color>
+    <color name="bbutton_danger_pressed_edge">#ffec378e</color>
+
 </resources>
