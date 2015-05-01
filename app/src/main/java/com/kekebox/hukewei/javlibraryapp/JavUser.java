@@ -103,6 +103,19 @@ public class JavUser {
 
     public void Logout() {
         isLogin = false;
+        favoriteVideosItemList.clear();
+        favoriteVideosPendingIDs.clear();
+        wantedVideosItemList.clear();
+        wantedVideosPendingIDs.clear();
+        loadedFavoriteVideos.clear();
+        loadedWantedVideos.clear();
+        watchedVideosPendingIDs.clear();
+        loadedWatchedVideos.clear();
+        watchedVideosItemList.clear();
+        FavoriteActors.clear();
+        FavoriteVideos.clear();
+        WantedVideos.clear();
+        WatchedVideos.clear();
     }
 
 

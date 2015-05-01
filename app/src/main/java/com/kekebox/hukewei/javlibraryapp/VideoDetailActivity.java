@@ -36,6 +36,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
@@ -149,10 +150,15 @@ public class VideoDetailActivity extends ActionBarActivity {
                     if(!isFavoriteVideo) {
                         //to add favorite action
                         action_type = "PUSH";
+                        JavUser.getCurrentUser().getFavoriteVideosItemList().add(item);
+                        JavUser.getCurrentUser().getLoadedFavoriteVideos().add(item.getId());
                     } else {
                         action_type = "PULL";
+                        JavUser.getCurrentUser().getFavoriteVideosItemList().remove(item);
+                        JavUser.getCurrentUser().getLoadedFavoriteVideos().remove(item.getId());
                     }
                     favoriteVideo.setBootstrapButtonEnabled(false);
+
                     new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
                             PreferenceType.favorite_videos.toString(), action_type,
                             item.getId(), "").execute((Void) null);
@@ -176,8 +182,12 @@ public class VideoDetailActivity extends ActionBarActivity {
                     if(!isWatchedVideo) {
                         //to add favorite action
                         action_type = "PUSH";
+                        JavUser.getCurrentUser().getWatchedVideosItemList().add(item);
+                        JavUser.getCurrentUser().getLoadedWatchedVideos().add(item.getId());
                     } else {
                         action_type = "PULL";
+                        JavUser.getCurrentUser().getWatchedVideosItemList().remove(item);
+                        JavUser.getCurrentUser().getLoadedWatchedVideos().remove(item.getId());
                     }
                     watchedVideo.setBootstrapButtonEnabled(false);
                     new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
@@ -204,8 +214,12 @@ public class VideoDetailActivity extends ActionBarActivity {
                     if(!isWantedVideo) {
                         //to add favorite action
                         action_type = "PUSH";
+                        JavUser.getCurrentUser().getWantedVideosItemList().add(item);
+                        JavUser.getCurrentUser().getLoadedWantedVideos().add(item.getId());
                     } else {
                         action_type = "PULL";
+                        JavUser.getCurrentUser().getWantedVideosItemList().remove(item);
+                        JavUser.getCurrentUser().getLoadedWantedVideos().remove(item.getId());
                     }
                     wantedVideo.setBootstrapButtonEnabled(false);
                     new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
@@ -440,8 +454,9 @@ public class VideoDetailActivity extends ActionBarActivity {
 
                         } else {
                             Toast.makeText(VideoDetailActivity.this, "已取消关注 " + Content, Toast.LENGTH_SHORT).show();
-                            JavUser.getCurrentUser().getFavoriteActors().remove(Content);
+                            JavUser.getCurrentUser().getFavoriteActors().removeAll(Arrays.asList(Content));
                         }
+
                         break;
                     case "wanted_videos":
                         wantedVideo.setBootstrapButtonEnabled(true);
@@ -451,19 +466,19 @@ public class VideoDetailActivity extends ActionBarActivity {
 
                         } else {
                             wantedVideo.setBootstrapType("default");
-                            JavUser.getCurrentUser().getWantedVideos().remove(Content);
+                            JavUser.getCurrentUser().getWantedVideos().removeAll(Arrays.asList(Content));
                         }
                         isWantedVideo = JavUser.getCurrentUser().getWantedVideos().contains(item.getId());
                         break;
                     case "favorite_videos":
                         favoriteVideo.setBootstrapButtonEnabled(true);
-                        if(ActionType =="PUSH") {
+                        if(ActionType.equals("PUSH")) {
                             favoriteVideo.setBootstrapType("danger");
                             JavUser.getCurrentUser().getFavoriteVideos().add(Content);
 
                         } else {
                             favoriteVideo.setBootstrapType("default");
-                            JavUser.getCurrentUser().getFavoriteVideos().remove(Content);
+                            JavUser.getCurrentUser().getFavoriteVideos().removeAll(Arrays.asList(Content));
                         }
                         isFavoriteVideo = JavUser.getCurrentUser().getFavoriteVideos().contains(item.getId());
                         break;
@@ -475,7 +490,7 @@ public class VideoDetailActivity extends ActionBarActivity {
 
                         } else {
                             watchedVideo.setBootstrapType("default");
-                            JavUser.getCurrentUser().getWatchedVideos().remove(Content);
+                            JavUser.getCurrentUser().getWatchedVideos().removeAll(Arrays.asList(Content));
                         }
                         isWatchedVideo = JavUser.getCurrentUser().getWatchedVideos().contains(item.getId());
                         break;

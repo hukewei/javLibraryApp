@@ -443,4 +443,10 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.notifyDataSetChanged();
+    }
+
 }
