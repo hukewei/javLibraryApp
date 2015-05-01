@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Handler;
 
+import cn.jpush.android.api.JPushInterface;
+
 /**
  * Created by hukewei on 25/04/15.
  */
@@ -364,6 +366,18 @@ public class SplashScreenActivity extends Activity {
             }
             //mMileAccrualHistoryTask = null;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        JPushInterface.onResume(this);
+    }
+
+    @Override
+    protected  void onPause() {
+        super.onPause();
+        JPushInterface.onPause(this);
     }
 
 }
