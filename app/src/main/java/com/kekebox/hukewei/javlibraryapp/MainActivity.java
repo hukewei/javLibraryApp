@@ -179,7 +179,7 @@ public class MainActivity extends ActionBarActivity
             return true;
         } else if (id == R.id.action_signInUp) {
             if(JavUser.getCurrentUser().isLogin()) {
-                JavUser.getCurrentUser().Logout();
+                JavUser.getCurrentUser().Logout(this);
             }
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, new LoginFragment())

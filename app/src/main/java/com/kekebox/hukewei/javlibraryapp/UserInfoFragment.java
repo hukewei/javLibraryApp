@@ -41,7 +41,7 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
         ActionBar.TabListener{
     private FragmentTabHost fragmentTabHost;
 
-    private ViewPager viewPager;
+    private NonSwipeableViewPager viewPager;
     private UserTabsPagerAdapter mAdapter;
     private Drawable oldBackground = null;
     private PagerSlidingTabStrip tabs;
@@ -60,9 +60,9 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
         FragmentActivity faActivity = (FragmentActivity) super.getActivity();
         new PreferenceRetrieveTask(JavUser.getCurrentUser().getUserId()).execute((Void) null);
         // Replace LinearLayout by the type of the root element of the layout you're trying to load
-        RelativeLayout llLayout = (RelativeLayout) inflater.inflate(R.layout.tab_fragment, container, false);
+        RelativeLayout llLayout = (RelativeLayout) inflater.inflate(R.layout.no_swipe_tab_fragment, container, false);
         // Initilization
-        viewPager = (ViewPager)llLayout.findViewById(R.id.pager);
+        viewPager = (NonSwipeableViewPager)llLayout.findViewById(R.id.pager);
         mAdapter = new UserTabsPagerAdapter(getActivity().getSupportFragmentManager());
 
         viewPager.setAdapter(mAdapter);
@@ -171,11 +171,10 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
                         } else {
                             continue;
                         }
+                        values.clear();
                         for (int i=0;i<jsonObj.getJSONArray(keyValue).length();i++){
-                            if (values != null) {
-                                Log.d(TAG, "add " + jsonObj.getJSONArray(keyValue).getString(i) );
-                                values.add(jsonObj.getJSONArray(keyValue).getString(i));
-                            }
+                            Log.d(TAG, "add " + jsonObj.getJSONArray(keyValue).getString(i) );
+                            values.add(jsonObj.getJSONArray(keyValue).getString(i));
                         }
 
                     }

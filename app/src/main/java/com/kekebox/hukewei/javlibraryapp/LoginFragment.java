@@ -5,6 +5,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.database.Cursor;
 import android.net.Uri;
@@ -33,6 +35,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.gc.materialdesign.views.CheckBox;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -74,6 +78,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
     private View mProgressView;
     private View mLoginFormView;
     JavUser mCurrentUser = JavUser.getCurrentUser();
+    private TextView mProgressViewText;
 
     @Override
     public  View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -106,7 +111,18 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
 
         mLoginFormView = llLayout.findViewById(R.id.email_login_form1);
         mProgressView = llLayout.findViewById(R.id.login_progress);
+        mProgressViewText = (TextView) llLayout.findViewById(R.id.login_text_progress);
         ((MainActivity)getActivity()).setupUI(llLayout.findViewById(R.id.login_fragment));
+
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String email = sharedPref.getString(getString(R.string.saved_email), null);
+        String pw = sharedPref.getString(getString(R.string.saved_pw), null);
+        if(email != null && pw != null) {
+            showProgress(true);
+            mAuthTask = new UserLoginTask(email, pw);
+            mAuthTask.execute((Void) null);
+        }
+
         return llLayout;
     }
 
@@ -164,7 +180,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, md5(password));
             mAuthTask.execute((Void) null);
         }
     }
@@ -200,17 +216,20 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
             });
 
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressViewText.setVisibility(show ? View.VISIBLE : View.GONE);
             mProgressView.animate().setDuration(shortAnimTime).alpha(
                     show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                    mProgressViewText.setVisibility(show ? View.VISIBLE : View.GONE);
                 }
             });
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressViewText.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
@@ -281,6 +300,12 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    mProgressViewText.setText("正在以 " + mEmail +" 身份进行登陆");
+
+                }
+            }, 0);
         }
 
         @Override
@@ -293,7 +318,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
             try {
                 HttpPost post = new HttpPost(getString(R.string.authentication_url));
                 json.put("email", mEmail);
-                json.put("password", md5(mPassword));
+                json.put("password", mPassword);
                 StringEntity se = new StringEntity( json.toString());
                 Log.i(TAG, json.toString());
                 se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
@@ -344,6 +369,10 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
             showProgress(false);
 
             if (success) {
+                CheckBox saveLoginCheckBox = (CheckBox) (getActivity().findViewById(R.id.saveLoginCheckBox));
+                if(saveLoginCheckBox.isCheck()) {
+                    JavUser.getCurrentUser().SaveUser(getActivity(), mEmail, mPassword);
+                }
                 ((MainActivity)getActivity()).updateMenuTitles();
                 Fragment next_fragment = new UserInfoFragment();
                 getFragmentManager().beginTransaction()

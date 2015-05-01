@@ -10,7 +10,6 @@
 
     <color name="gray">#808080</color>
     <color name="olive">#808000</color>
-    <color name="purple">#800080</color>
     <color name="maroon">#800000</color>
     <color name="aqua">#00FFFF</color>
     <color name="lime">#00FF00</color>
@@ -25,5 +24,37 @@
     <color name="bbutton_danger_disabled_edge">#82f33592</color>
     <color name="bbutton_danger_pressed">#fff63b8e</color>
     <color name="bbutton_danger_pressed_edge">#ffec378e</color>
+
+    <item name="purple" type="color">#FFAA66CC</item>
+    <item name="green_light" type="color">#FF99CC00</item>
+    <item name="orange" type="color">#FFFFBB33</item>
+    <item name="darkblue" type="color">#FF0099CC</item>
+    <item name="darkpurple" type="color">#FF9933CC</item>
+    <item name="darkgreen" type="color">#FF669900</item>
+    <item name="darkorange" type="color">#FFFF8800</item>
+    <item name="darkred" type="color">#FFCC0000</item>
+
+    <integer-array name="androidcolors">
+        <item>@color/fuchsia</item>
+        <item>@color/orange</item>
+        <item>@color/green_light</item>
+        <item>@color/purple</item>
+        <item>@color/red</item>
+        <item>@color/green</item>
+        <item>@color/gray</item>
+        <item>@color/darkblue</item>
+        <item>@color/dark_gray</item>
+        <item>@color/red_press</item>
+        <item>@color/darkgreen</item>
+        <item>@color/darkorange</item>
+        <item>@color/darkred</item>
+        <item>@color/darkpurple</item>
+    </integer-array>
+
+        <color name="backgroundColor">#E8E8E0</color>
+        <color name="backgroundColorPress">#DBDBD3</color>
+        <color name="red_press">#990000</color>
+        <color name="dark_gray">#4C535B</color>
+        <color name="dark_gray_press">#ff7e8a97</color>
 
 </resources>

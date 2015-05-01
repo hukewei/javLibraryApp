@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:gravity="center_horizontal"
     android:orientation="vertical" android:paddingBottom="@dimen/activity_vertical_margin"
@@ -10,7 +11,16 @@
     <!-- Login progress -->
     <ProgressBar android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" android:visibility="gone" />
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="18dp"
+        android:visibility="gone" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/login_text_progress"
+        android:visibility="gone"
+        android:textSize="17sp"
+        android:textColor="@color/silver"/>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@android:color/transparent">
@@ -34,9 +44,9 @@
                 android:layout_height="wrap_content"
                 android:text="欢迎！"
                 android:textStyle="bold"
-                android:textSize="30dp"
+                android:textSize="25dp"
                 android:textColor="@color/fuchsia"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="2dp"
                 android:id="@+id/welcome_text" />
 
             <AutoCompleteTextView android:id="@+id/email" android:layout_width="match_parent"
@@ -50,6 +60,24 @@
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeOptions="actionUnspecified" android:inputType="textPassword"
                 android:maxLines="1" android:singleLine="true" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical|left">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/fuchsia"
+                    android:text="记住密码"/>
+                <com.gc.materialdesign.views.CheckBox
+                    android:id="@+id/saveLoginCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#1E88E5"
+                    materialdesign:check="true" />
+                </LinearLayout>
+
 
             <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
                 android:layout_width="match_parent" android:layout_height="wrap_content"

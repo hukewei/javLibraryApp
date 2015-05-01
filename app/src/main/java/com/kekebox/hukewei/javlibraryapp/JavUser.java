@@ -1,5 +1,10 @@
 package com.kekebox.hukewei.javlibraryapp;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -26,6 +31,7 @@ public class JavUser {
     private ArrayList<String> watchedVideosPendingIDs= new ArrayList<>();
     private ArrayList<String> loadedWatchedVideos= new ArrayList<>();
     private ArrayList<VideoInfoItem> watchedVideosItemList= new ArrayList<>();
+    private ArrayList<String> notifiedActorList= new ArrayList<>();
 
 
     public static JavUser getCurrentUser() {
@@ -101,7 +107,7 @@ public class JavUser {
         WantedVideos = wantedVideos;
     }
 
-    public void Logout() {
+    public void Logout(Activity context) {
         isLogin = false;
         favoriteVideosItemList.clear();
         favoriteVideosPendingIDs.clear();
@@ -116,6 +122,7 @@ public class JavUser {
         FavoriteVideos.clear();
         WantedVideos.clear();
         WatchedVideos.clear();
+        cleanRememberMe(context);
     }
 
 
@@ -153,5 +160,25 @@ public class JavUser {
 
     public ArrayList<VideoInfoItem> getWatchedVideosItemList() {
         return watchedVideosItemList;
+    }
+
+    public void SaveUser(FragmentActivity activity, String email, String pw) {
+        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(activity.getString(R.string.saved_email), email);
+        editor.putString(activity.getString(R.string.saved_pw), pw);
+        editor.commit();
+    }
+
+    public void cleanRememberMe(Activity context){
+        SharedPreferences sharedPref = context.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(context.getString(R.string.saved_email), null);
+        editor.putString(context.getString(R.string.saved_pw), null);
+        editor.commit();
+    }
+
+    public ArrayList<String> getNotifiedActorList() {
+        return notifiedActorList;
     }
 }

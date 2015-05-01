@@ -35,5 +35,9 @@ dependencies {
     compile 'com.github.castorflex.smoothprogressbar:library:1.1.0'
     compile 'com.beardedhen:androidbootstrap:+'
     compile 'com.jmpergar:AwesomeText:1.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'com.android.support:support-v4:21.+'
+    compile "com.daimajia.swipelayout:library:1.2.0@aar"
+    compile 'com.kyleduo.switchbutton:library:1.2.8'
 
 }

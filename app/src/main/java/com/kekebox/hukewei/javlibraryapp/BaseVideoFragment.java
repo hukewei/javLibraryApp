@@ -353,12 +353,14 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                    if(spb != null)
-                    spb.progressiveStart();
-                }
-            });
+            if(getActivity() != null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        if (spb != null)
+                            spb.progressiveStart();
+                    }
+                });
+            }
             if(ids.isEmpty()) {
                 endOfList = true;
                 return false;

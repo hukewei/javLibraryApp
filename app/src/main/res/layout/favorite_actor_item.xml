@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<com.daimajia.swipe.SwipeLayout
+    xmlns:swipe="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipe"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    swipe:leftEdgeSwipeOffset="0dp"
+    swipe:rightEdgeSwipeOffset="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/silver"
+        android:gravity="center"
+        android:tag="Bottom3"
+        android:weightSum="10">
+
+        <ImageView
+            android:id="@+id/trash"
+            android:layout_width="27dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_highlight_remove_white_24dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:text="取消关注?"
+            android:textColor="#fff"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/delete"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:background="#ffeeeeee"
+            android:text="确定"
+            android:textColor="@color/silver"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@color/fuchsia"
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:gravity="center"
+                android:id="@+id/big_name"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="10dp" />
+
+            <TextView
+                android:id="@+id/text_data"
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:tag="Hover"
+                android:layout_toRightOf="@+id/big_name"
+                android:textColor="@color/fuchsia"
+                android:gravity="center|left"
+                android:textStyle="bold"
+                android:textSize="17sp"
+                android:layout_marginLeft="10dp" />
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:background="@color/fuchsia"
+                android:text="已开启推送"
+                android:gravity="center"
+                android:layout_alignParentRight="true"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:textSize="20dp"
+                android:textColor="#fff" />
+            <LinearLayout
+                android:layout_alignParentRight="true"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical|right"
+                android:layout_toRightOf="@+id/text_data"
+                android:layout_toEndOf="@+id/text_data">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/silver"
+                    android:text="推送"/>
+                <com.kyleduo.switchbutton.SwitchButton
+                    android:id="@+id/sb_use_listener"
+                    style="@style/SwitchButtonStyle" />
+
+                </LinearLayout>
+
+
+            </RelativeLayout>
+
+
+    </LinearLayout>
+</com.daimajia.swipe.SwipeLayout>
