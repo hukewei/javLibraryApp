@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import com.igexin.sdk.PushManager;
 
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -60,6 +61,7 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
         ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
+        PushManager.getInstance().initialize(this.getApplicationContext());
 
     }
 

@@ -23,6 +23,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files('libs/universal-image-loader-1.9.3.jar')
+    compile files('libs/GetuiSdk2.4.1.0.jar')
+    compile files('libs/GetuiExt-2.0.3.jar')
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
     compile 'com.github.clans:fab:1.4.0'
