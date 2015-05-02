@@ -110,6 +110,8 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name="cn.jpush.android.intent.REGISTRATION" /> <!--Required  用户注册SDK的intent-->
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_RECEIVED" />
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_OPENED" />
                 <category android:name="com.kekebox.hukewei.javlibraryapp" />
             </intent-filter>
         </receiver>

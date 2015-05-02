@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,8 +23,17 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 
+import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 
 public class MainActivity extends ActionBarActivity
@@ -31,7 +43,9 @@ public class MainActivity extends ActionBarActivity
 
     public static final int CONNECTION_TIMEOUT = 10000;
     public static final boolean ENABLE_THUMBS = true;
+    private static final String TAG = "MainActivity";
     private Menu menu;
+    String videoId;
 
 
     /**
@@ -50,6 +64,14 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
         setupUI(findViewById(R.id.drawer_layout));
 
+        Intent intent = getIntent();
+        videoId = intent.getStringExtra("VideoID");
+        if(videoId != null) {
+            Log.d(TAG, "video id = " + videoId);
+        } else {
+            Log.d(TAG, "no intent for video id");
+        }
+
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -61,7 +83,14 @@ public class MainActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
         ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
 
+        if(JavLibApplication.getCurrentVideoItem() != null) {
+            Intent detail_intent = new Intent(this, VideoDetailActivity.class);
+            startActivity(detail_intent);
+        }
+
     }
+
+
 
     public void setupUI(View view) {
 

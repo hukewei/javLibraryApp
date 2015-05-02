@@ -33,7 +33,8 @@ public class JavLibApplication extends Application {
         FavoriteVideos,
         WantedVideos,
         WatchedVideos,
-        FavoriteActors;
+        FavoriteActors,
+        All;
     }
     public static ArrayList<String> mostWantedIDs = new ArrayList<>();
     public ArrayList<String> mostWantedOriginIDs = new ArrayList<>();

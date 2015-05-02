@@ -19,6 +19,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -45,6 +46,40 @@ public class RegistrationReceiver extends BroadcastReceiver {
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("REGISTRATION_ID", regId);
             editor.commit();
+        } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
+            Log.d(TAG, "[MyReceiver] 接收到推送下来的通知");
+            int notifactionId = bundle.getInt(JPushInterface.EXTRA_NOTIFICATION_ID);
+            Log.d(TAG, "[MyReceiver] 接收到推送下来的通知的ID: " + notifactionId);
+            String type = bundle.getString(JPushInterface.EXTRA_EXTRA);
+            Log.d(TAG, "[MyReceiver] 接收到推送下来的通知的type: " + type);
+
+        } else if (JPushInterface.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
+            Log.d(TAG, "[MyReceiver] 用户点击打开了通知");
+            Bundle myBundle = new Bundle();
+            String video_id = null;
+            try {
+                JSONObject jsonObj = new JSONObject(bundle.getString(JPushInterface.EXTRA_EXTRA));
+                Iterator<String> keys= jsonObj.keys();
+                while (keys.hasNext()) {
+                    String keyValue = (String) keys.next();
+                    if(keyValue.equals("VideoID") ) {
+                        video_id = jsonObj.getString("VideoID");
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if(video_id != null) {
+                myBundle.putString("VideoID", video_id);
+            }
+            //打开自定义的Activity
+            Intent i = new Intent(context, SplashScreenActivity.class);
+            i.putExtras(myBundle);
+            //i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP );
+            context.startActivity(i);
+
         }
     }
 

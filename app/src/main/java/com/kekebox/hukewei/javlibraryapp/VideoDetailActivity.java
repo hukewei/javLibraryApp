@@ -105,6 +105,7 @@ public class VideoDetailActivity extends ActionBarActivity {
                 .build();
 
         if(JavLibApplication.getCurrentVideoItem() == null) {
+            Log.d(TAG, "no current video item, finish");
             finish();
         } else {
             item = JavLibApplication.getCurrentVideoItem();
