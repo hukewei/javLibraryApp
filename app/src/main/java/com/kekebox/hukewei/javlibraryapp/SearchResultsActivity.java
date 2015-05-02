@@ -161,7 +161,7 @@ public class SearchResultsActivity extends ActionBarActivity {
 
         public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<VideoInfoItem> result) {
             mContext = context;
-            mFeedURL = req_url + "?regex[designation]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
+            mFeedURL = req_url + "?regex[title]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
             mResultReference = result;
         }
 
