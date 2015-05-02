@@ -30,12 +30,11 @@
             android:background="@drawable/black_shadow"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-            android:paddingBottom="25dp"
-            android:layout_marginTop="10dp">
+            android:paddingBottom="25dp">
 
     <ScrollView android:id="@+id/login_form" android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="8dp">
 
         <LinearLayout android:id="@+id/email_login_form" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:orientation="vertical">
@@ -46,7 +45,6 @@
                 android:textStyle="bold"
                 android:textSize="25dp"
                 android:textColor="@color/fuchsia"
-                android:layout_marginBottom="2dp"
                 android:id="@+id/welcome_text" />
 
             <AutoCompleteTextView android:id="@+id/email" android:layout_width="match_parent"
@@ -81,7 +79,7 @@
 
             <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" android:text="@string/action_sign_in"
+                android:layout_marginTop="12dp" android:text="@string/action_sign_in"
                 android:textStyle="bold"
                 android:textColor="#fff"
                 android:background="@color/fuchsia" />

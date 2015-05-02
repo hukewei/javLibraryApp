@@ -62,7 +62,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
     int nbTaskOnGoing = 0;
     int nbTaskLoaded = 0;
     static final int NB_FIRST_LOAD_TASK = 20;
-    static final int NB_TASK_LOAD_SCROLL = 10;
+    static final int NB_TASK_LOAD_SCROLL = 15;
     SmoothProgressBar spb;
 
 
@@ -350,6 +350,12 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     JavLibApplication.onLoadFailed(ids.get(i), mType);
                 }
                 if(endOfList) {
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            if(spb != null)
+                                spb.setVisibility(View.GONE);
+                        }
+                    }, 0);
                     //Toast.makeText(mContext, "暂时没有可以加载的信息了哦！", Toast.LENGTH_SHORT).show();
                 } else {
                     //Toast.makeText(mContext, "载入失败，请重试！", Toast.LENGTH_SHORT).show();

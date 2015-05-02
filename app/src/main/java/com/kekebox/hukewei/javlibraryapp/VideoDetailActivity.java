@@ -100,7 +100,6 @@ public class VideoDetailActivity extends ActionBarActivity {
                 .showImageOnLoading(R.drawable.placeholder)
                 .showImageForEmptyUri(R.drawable.placeholder)
                 .showImageOnFail(R.drawable.placeholder)
-                .cacheInMemory(true)
                 .cacheOnDisk(true)
                 .build();
 

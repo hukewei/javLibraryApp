@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 public class SearchResultsActivity extends ActionBarActivity {
 
     private static final String TAG = "SearchResultsActivity";
-    private static final int MAX_LOAD_IDS = 100;
+    private static final int MAX_LOAD_IDS = 150;
     String Query;
     VideoPictureAdapter mAdapter;
     ArrayList<VideoInfoItem> searchResult;

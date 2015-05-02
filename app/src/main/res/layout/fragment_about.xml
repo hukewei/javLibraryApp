@@ -101,7 +101,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/jav_text"/>
+                    android:text="@string/jav_text"
+                    android:layout_marginBottom="20dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
