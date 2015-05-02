@@ -231,10 +231,10 @@ public class SearchResultsActivity extends ActionBarActivity {
                     pb.setVisibility(View.GONE);
                     if(searchResult.isEmpty()) {
                         findViewById(R.id.search_result_empty).setVisibility(View.VISIBLE);
-                        getSupportActionBar().setTitle(getString(R.string.search_results));
                     }
                 }
             }, 0);
+            getSupportActionBar().setTitle(getString(R.string.search_results));
         }
 
         @Override

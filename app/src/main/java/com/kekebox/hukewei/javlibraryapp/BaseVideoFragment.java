@@ -101,7 +101,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         LinearLayout llLayout    = (LinearLayout)    inflater.inflate(R.layout.fragment_base_view, container, false);
         pb = (ProgressBar) llLayout.findViewById(R.id.video_detail_progress);
         spb = (SmoothProgressBar) llLayout.findViewById(R.id.smooth_progressbar);
-        spb.progressiveStop();
+        spb.setVisibility(View.GONE);
         mSwipeRefreshLayout = (SwipeRefreshLayout) llLayout.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -282,8 +282,10 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             if(getActivity() != null) {
                 getActivity().runOnUiThread(new Runnable() {
                     public void run() {
-                        if (spb != null)
+                        if (spb != null) {
+                            spb.setVisibility(View.VISIBLE);
                             spb.progressiveStart();
+                        }
                     }
                 });
             }
