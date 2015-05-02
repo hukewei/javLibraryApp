@@ -42,7 +42,7 @@ public class RegistrationReceiver extends BroadcastReceiver {
             String regId = bundle.getString(JPushInterface.EXTRA_REGISTRATION_ID);
             Log.d(TAG, "[MyReceiver] 接收Registration Id : " + regId);
             //send the Registration Id to your server...
-            SharedPreferences sharedPref = ((Activity)context).getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences sharedPref = context.getSharedPreferences("my_prefs",Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("REGISTRATION_ID", regId);
             editor.commit();

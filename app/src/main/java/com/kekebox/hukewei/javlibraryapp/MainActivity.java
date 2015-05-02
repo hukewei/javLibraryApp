@@ -5,8 +5,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -26,19 +24,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 
-import com.gc.materialdesign.views.ButtonFlat;
 import com.gc.materialdesign.widgets.Dialog;
 import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 
 
 public class MainActivity extends ActionBarActivity
@@ -172,7 +161,10 @@ public class MainActivity extends ActionBarActivity
             } else {
                 next_fragment = new LoginFragment();
             }
-        } else{
+        } else if (position == 3){
+
+            next_fragment = new AboutFragment();
+        } else {
             next_fragment = PlaceholderFragment.newInstance(position + 1);
         }
         fragmentManager.beginTransaction()
@@ -190,6 +182,9 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 2:
                 mTitle = getString(R.string.title_section3);
+                break;
+            case 3:
+                mTitle = getString(R.string.title_section4);
                 break;
         }
     }

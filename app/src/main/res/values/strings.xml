@@ -30,11 +30,18 @@
     <string name="saved_pw" >SAVED_PW_MD5</string>
     <string name="search_title">搜片</string>
     <string name="search_results">搜索结果</string>
+    <string name="declaration_title">注意</string>
+    <string name="declaration_text">本物品内容可能令人反感；不可将本物品内容派发，传阅，出售，出租，交给或出借予年龄未满 18 岁的人士出示，播放或播映。</string>
     <string name="warning_title">警告 / WARNING</string>
-    <string name="warning_text">我至少已經年滿十八歲（或是在我所在地已經達到法定成年）。瀏覽、閱讀或是下載成人訊息並不違反我所在社群、程式、地區或是國家。我將為我任何的在這網站所做出的任何不法行為負責。</string>
+    <string name="warning_text">本应用使用者需要至少已经年满十八岁（或是在使用者所在地已经达到法定成年）。浏览、阅读或是下载成人讯息并不违反使用者所在社群、程式、地区或是国家。使用者将为自己任何的不法行为负责。</string>
     <string name="accept">接受</string>
     <string name="decline">拒绝</string>
     <string name="searching">搜索中...</string>
+    <string name="jav_title">JavLibrary 是什么？</string>
+    <string name="jav_text">JavLibrary 是一个线上日本成人影片图书馆。你可以搜寻并查询日本成人影片的相关资讯。如果你对日本成人影片不熟，这里会是个危险的地方，因为你将很快地沉迷在其中。如果你已经是个日本成人影片迷，则你大概已经有一些困扰，这也是我们存在的目的。</string>
+    <string name="javapp_title">Jav小助手是什么？</string>
+    <string name="javapp_text">Jav小助手是专门为手机端设计的非官方客户端，非javlibrary.com开发。应用的内容通过爬虫抓取自javlibrary.com，本应用不对内容负任何责任，也不对应用对使用者产生的结果负任何责任，如果您不接受次条款，请立即停止使用本应用，并将其彻底卸载。如果您发现本应用侵害了您的权益，请立即联系我们。</string>
+    <string name="title_section4">关于</string>
 
 
 </resources>
