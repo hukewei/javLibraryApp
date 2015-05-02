@@ -7,5 +7,6 @@ public enum  PreferenceType {
     favorite_actors,
     favorite_videos,
     wanted_videos,
-    watched_videos;
+    watched_videos,
+    notified_actors;
 }

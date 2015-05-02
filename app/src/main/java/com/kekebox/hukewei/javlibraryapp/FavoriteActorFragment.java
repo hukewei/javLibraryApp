@@ -102,6 +102,7 @@ public class FavoriteActorFragment extends Fragment implements SwipeRefreshLayou
     @Override
     public void onResume() {
         Log.d(TAG, "current favorite actors = " + JavUser.getCurrentUser().getFavoriteActors());
+        Log.d(TAG, "current notified actors = " + JavUser.getCurrentUser().getNotifiedActorList());
         super.onResume();
         mAdapter.notifyDataSetChanged();
     }

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
@@ -25,6 +26,7 @@ import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.kekebox.hukewei.javlibraryapp.jav.PreferenceType;
+import com.kyleduo.switchbutton.SwitchButton;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -54,6 +56,7 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
     ArrayList<String> actorItem;
     private static final String TAG = "OPActivityAdapter";
     Animation anim;
+    //SwitchButton sb;
 
     public ActorsManageAdapter(Context mContext) {
         this.mContext = mContext;
@@ -71,6 +74,7 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
         final View v = LayoutInflater.from(mContext).inflate(R.layout.favorite_actor_item, null);
         final SwipeLayout swipeLayout = (SwipeLayout)v.findViewById(getSwipeLayoutResourceId(position));
         final TextView bigName = (TextView) v.findViewById(R.id.big_name);
+        SwitchButton sb = (SwitchButton) v.findViewById(R.id.sb_use_listener);
 
         swipeLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -88,10 +92,12 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
                 anim = AnimationUtils.loadAnimation(
                         mContext, android.R.anim.slide_out_right
                 );
+
                 new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
                         PreferenceType.favorite_actors.toString(), "PULL",
-                        actorItem.get(position), "").execute((Void) null);
-                anim.setDuration(800);
+                        actorItem.get(position), "", null).execute((Void) null);
+
+                anim.setDuration(1000);
                 swipeLayout.startAnimation(anim);
                 anim.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -110,11 +116,15 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
                 });
             }
         });
+
+        sb.setOnCheckedChangeListener(new checkButtonListener(actorItem.get(position)));
+
         return v;
     }
 
     @Override
-    public void fillValues(int position, View view) {
+    public void fillValues(final int position, View view) {
+        SwitchButton sb = (SwitchButton) view.findViewById(R.id.sb_use_listener);
         TextView t = (TextView)view.findViewById(R.id.position);
         t.setText((position + 1) + ".");
         TextView name = (TextView)view.findViewById(R.id.text_data);
@@ -125,7 +135,14 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
         int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
         TextView bigName = (TextView) view.findViewById(R.id.big_name);
         bigName.setBackgroundColor(randomAndroidColor);
+        sb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
+            }
+        });
+        sb.setChecked(JavUser.getCurrentUser().getNotifiedActorList().contains(actorItem.get(position)));
+        sb.setOnCheckedChangeListener(new checkButtonListener(actorItem.get(position)));
 
     }
 
@@ -133,6 +150,29 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
     {
         int codePoint = Character.codePointAt(str, index);
         return new String( Character.toChars(codePoint));
+    }
+
+    class checkButtonListener implements CompoundButton.OnCheckedChangeListener {
+        String actor;
+
+        checkButtonListener(String actor) {
+            this.actor = actor;
+        }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            String action = null;
+            buttonView.setEnabled(false);
+            if (isChecked) {
+                //get notified for the current actor
+                action = "PUSH";
+            } else {
+                action = "PULL";
+            }
+            new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
+                    PreferenceType.notified_actors.toString(), action,
+                    actor, "", (SwitchButton)buttonView).execute((Void) null);
+        }
     }
 
     @Override
@@ -158,14 +198,16 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
         private final String ActionType;
         private final String Content;
         private final String Extra;
+        SwitchButton button;
 
 
-        PreferenceUpdateTask(String uid, String preference_type, String action_type, String data, String extra) {
+        PreferenceUpdateTask(String uid, String preference_type, String action_type, String data, String extra, SwitchButton buttonView) {
             userID = uid;
             this.preference_type = preference_type;
             ActionType = action_type;
             Content = data;
             Extra = extra;
+            button = buttonView;
         }
 
         @Override
@@ -217,12 +259,45 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
 
 
             if (success) {
-                Toast.makeText(mContext, "已取消关注 " + Content, Toast.LENGTH_SHORT).show();
-                JavUser.getCurrentUser().getFavoriteActors().removeAll(Arrays.asList(Content));
-                actorItem.removeAll(Arrays.asList(Content));
-                notifyDataSetChanged();
+                if(preference_type.equals(PreferenceType.favorite_actors.toString())) {
+
+                    Toast.makeText(mContext, "已取消关注 " + Content, Toast.LENGTH_SHORT).show();
+                    JavUser.getCurrentUser().getFavoriteActors().removeAll(Arrays.asList(Content));
+                    actorItem.removeAll(Arrays.asList(Content));
+                    JavUser.getCurrentUser().getNotifiedActorList().removeAll(Arrays.asList(Content));
+                    notifyDataSetChanged();
+                } else if (preference_type.equals(PreferenceType.notified_actors.toString())) {
+                    if(ActionType.equals("PULL")) {
+                        if(!Extra.equals("QUITE")) {
+                            Toast.makeText(mContext, "已取消推送 " + Content, Toast.LENGTH_SHORT).show();
+                        }
+                        JavUser.getCurrentUser().getNotifiedActorList().removeAll(Arrays.asList(Content));
+                    } else {
+                        Toast.makeText(mContext, "已注册推送 " + Content, Toast.LENGTH_SHORT).show();
+                        JavUser.getCurrentUser().getNotifiedActorList().add(Content);
+                    }
+                }
             } else {
                 Toast.makeText(mContext, "更新失败，请稍后再试", Toast.LENGTH_SHORT).show();
+            }
+            if (preference_type.equals("notified_actors")) {
+                if(button != null) {
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            button.setEnabled(true);
+                            button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                                }
+                            });
+                            button.setChecked(JavUser.getCurrentUser().getNotifiedActorList().contains(Content));
+                            button.setOnCheckedChangeListener(new checkButtonListener(Content));
+                        }
+                    });
+                }
+
             }
         }
 

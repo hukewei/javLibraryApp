@@ -105,6 +105,16 @@
 
         </receiver>
 
+        <receiver
+            android:name="com.kekebox.hukewei.javlibraryapp.RegistrationReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="cn.jpush.android.intent.REGISTRATION" /> <!--Required  用户注册SDK的intent-->
+                <category android:name="com.kekebox.hukewei.javlibraryapp" />
+            </intent-filter>
+        </receiver>
+
+
         <!-- Required SDK核心功能-->
         <receiver android:name="cn.jpush.android.service.AlarmReceiver" />
         <!-- Required  . Enable it you can get statistics data with channel -->

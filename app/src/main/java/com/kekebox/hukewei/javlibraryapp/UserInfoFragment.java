@@ -2,6 +2,8 @@ package com.kekebox.hukewei.javlibraryapp;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -23,6 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
@@ -32,6 +35,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -132,6 +136,7 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
 
         private static final String TAG = "PreferenceRetrieveTask";
         private final String userID;
+        private String clientIdToUpdate = null;
 
         PreferenceRetrieveTask(String id) {
             userID = id;
@@ -144,6 +149,7 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
             HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
             HttpResponse response;
 
+
             try {
                 HttpGet get = new HttpGet(getString(R.string.preference_url) + userID);
                 response = client.execute(get);
@@ -154,6 +160,7 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
                     Log.d(TAG, "response = " + json_string);
                     JSONObject jsonObj = new JSONObject(json_string);
                     Iterator<String> keys= jsonObj.keys();
+                    String client_id = null;
                     while (keys.hasNext())
                     {
 
@@ -168,6 +175,11 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
                             values = JavUser.getCurrentUser().getWantedVideos();
                         } else if (keyValue.equals("watched_videos")) {
                             values = JavUser.getCurrentUser().getWatchedVideos();
+                        } else if (keyValue.equals("notified_actors")) {
+                            values = JavUser.getCurrentUser().getNotifiedActorList();
+                        } else if (keyValue.equals("clientID")) {
+                            client_id = jsonObj.getString("clientID");
+                            continue;
                         } else {
                             continue;
                         }
@@ -175,6 +187,103 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
                         for (int i=0;i<jsonObj.getJSONArray(keyValue).length();i++){
                             Log.d(TAG, "add " + jsonObj.getJSONArray(keyValue).getString(i) );
                             values.add(jsonObj.getJSONArray(keyValue).getString(i));
+                        }
+
+                    }
+                    SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    String saved_client_id = sharedPref.getString(("REGISTRATION_ID"), null);
+                    Log.d(TAG, "client id from server= " + client_id);
+                    Log.d(TAG, "client id saved locally= " + saved_client_id);
+                    if( (client_id == null && saved_client_id != null) ||
+                            (client_id != null &&  saved_client_id != null && !client_id.equals(saved_client_id))) {
+                        //update clientID using saved_client_id
+                        clientIdToUpdate = saved_client_id;
+                    } else {
+                        Log.d(TAG, "client ID not need to update");
+                    }
+
+
+                    Log.i(TAG, json_string);
+                } else {
+                    return false;
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if(clientIdToUpdate != null) {
+                new ClientIDUpdateTask(JavUser.getCurrentUser().getUserId(), "clientID", "PUSH", clientIdToUpdate, "").execute((Void) null);
+            }
+
+
+            if (success) {
+                //mAdapter.notifyDataSetChanged();
+                //fixme inform current fragment
+            } else {
+                Toast.makeText(getActivity(), "刷新失败，请稍后再试", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mPrefTask = null;
+        }
+    }
+
+
+    public class ClientIDUpdateTask extends AsyncTask<Void, Void, Boolean> {
+
+        private static final String TAG = "PreferenceUpdateTask";
+        private final String userID;
+        private final String preference_type;
+        private final String ActionType;
+        private final String Content;
+        private final String Extra;
+
+
+        ClientIDUpdateTask(String uid, String preference_type, String action_type, String data, String extra) {
+            userID = uid;
+            this.preference_type = preference_type;
+            ActionType = action_type;
+            Content = data;
+            Extra = extra;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+            JSONObject json = new JSONObject();
+
+            try {
+
+                HttpPut put = new HttpPut(getString(R.string.preference_url) + userID + "?action="+ActionType);
+                json.put(preference_type, Content);
+                StringEntity se = new StringEntity( json.toString(),HTTP.UTF_8);
+                Log.i(TAG, json.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                put.setHeader("Accept-Charset", "utf-8");
+                put.setEntity(se);
+                response = client.execute(put);
+
+
+                /*Checking response */
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    Log.d(TAG, "response = " + json_string);
+                    JSONObject jsonObj = new JSONObject(json_string);
+                    Iterator<String> keys= jsonObj.keys();
+                    while (keys.hasNext())
+                    {
+                        String keyValue = keys.next();
+                        if(keyValue.equals("_id")) {
+                            return true;
                         }
 
                     }
@@ -190,19 +299,15 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
 
         @Override
         protected void onPostExecute(final Boolean success) {
-
-
-            if (success) {
-                //mAdapter.notifyDataSetChanged();
-                //fixme inform current fragment
+            if(success) {
+                Log.d(TAG, "clientID update success");
             } else {
-                Toast.makeText(getActivity(), "刷新失败，请稍后再试", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "client ID update fail");
             }
         }
 
         @Override
         protected void onCancelled() {
-            mPrefTask = null;
         }
     }
 }

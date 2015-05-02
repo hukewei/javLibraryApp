@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import cn.jpush.android.api.JPushInterface;
 
 /**
  * Created by hukewei on 28/04/15.
@@ -17,6 +20,7 @@ public class JavUser {
     private String HashedPassword;
     private String UserId;
     private boolean isLogin;
+    private String clientID;
     private ArrayList<String> FavoriteActors = new ArrayList<>();
     private ArrayList<String> FavoriteVideos = new ArrayList<>();
     private ArrayList<String> WantedVideos = new ArrayList<>();
@@ -167,7 +171,12 @@ public class JavUser {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(activity.getString(R.string.saved_email), email);
         editor.putString(activity.getString(R.string.saved_pw), pw);
+        if(JPushInterface.getRegistrationID(activity) != null) {
+            editor.putString("REGISTRATION_ID", JPushInterface.getRegistrationID(activity));
+        }
         editor.commit();
+        clientID = JPushInterface.getRegistrationID(activity);
+        Log.d("JavUser", "client id = " + clientID);
     }
 
     public void cleanRememberMe(Activity context){
