@@ -101,6 +101,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         LinearLayout llLayout    = (LinearLayout)    inflater.inflate(R.layout.fragment_base_view, container, false);
         pb = (ProgressBar) llLayout.findViewById(R.id.video_detail_progress);
         spb = (SmoothProgressBar) llLayout.findViewById(R.id.smooth_progressbar);
+        spb.progressiveStop();
         mSwipeRefreshLayout = (SwipeRefreshLayout) llLayout.findViewById(R.id.swipe_container);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -170,8 +171,14 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         });
 
         if(VideoItemList.isEmpty()) {
+            Log.d(TAG, "video item list is empty");
             final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
-            new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+            if(!videos_to_load.isEmpty()) {
+                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+            } else {
+                myListView.setVisibility(View.VISIBLE);
+                pb.setVisibility(View.GONE);
+            }
 
 //            for (int i = 0; i < videos_to_load.size(); i++) {
 //                Handler handler = new Handler();
@@ -187,6 +194,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 //
 //            }
         } else {
+            Log.d(TAG, "item = " + VideoItemList.toString());
             myListView.setVisibility(View.VISIBLE);
             pb.setVisibility(View.GONE);
 
@@ -199,6 +207,12 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
     @Override
     public void onRefresh() {
+        if(VideoItemList.isEmpty()) {
+            final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
+            if(!videos_to_load.isEmpty()) {
+                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+            }
+        }
         myListView.invalidateViews();
         mAdapter.notifyDataSetChanged();
 //        Handler handler = new Handler();
@@ -212,6 +226,11 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 //        }, 2000);
         mSwipeRefreshLayout.setRefreshing(false);
 
+    }
+
+    public void updateList() {
+        ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
+        new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
     }
 //
 //    @Override
@@ -314,14 +333,15 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     if(spb != null)
                     spb.progressiveStop();
                 }
-            }, 1200);
+            }, 800);
+            mAdapter.notifyDataSetChanged();
+            myListView.invalidateViews();
 
             if (success) {
                 for (int i = 0; i < ids.size(); i++) {
                     JavLibApplication.onLoadSucceed(ids.get(i), mType);
                 }
-                mAdapter.notifyDataSetChanged();
-                myListView.invalidateViews();
+
 
             } else {
                 for (int i = 0; i < ids.size(); i++) {
@@ -330,7 +350,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 if(endOfList) {
                     //Toast.makeText(mContext, "暂时没有可以加载的信息了哦！", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(mContext, "载入失败，请重试！", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mContext, "载入失败，请重试！", Toast.LENGTH_SHORT).show();
                 }
             }
             new Handler().postDelayed(new Runnable() {

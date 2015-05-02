@@ -295,6 +295,7 @@ public class VideoDetailActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
+                JavLibApplication.setCurrentVideoItem(null);
                 finish();
                 return true;
         }

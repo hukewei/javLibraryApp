@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MyJavLib</string>
+    <string name="app_name">Jav小助手</string>
     <string name="title_section1">首页</string>
     <string name="title_section2">搜索</string>
     <string name="title_section3">个人中心</string>
@@ -28,6 +28,13 @@
     <string name="please_login">需要登陆才能使用该功能，请返回主菜单进行登陆/注册。</string>
     <string name="saved_email" >SAVED_EMAIL</string>
     <string name="saved_pw" >SAVED_PW_MD5</string>
+    <string name="search_title">搜片</string>
+    <string name="search_results">搜索结果</string>
+    <string name="warning_title">警告 / WARNING</string>
+    <string name="warning_text">我至少已經年滿十八歲（或是在我所在地已經達到法定成年）。瀏覽、閱讀或是下載成人訊息並不違反我所在社群、程式、地區或是國家。我將為我任何的在這網站所做出的任何不法行為負責。</string>
+    <string name="accept">接受</string>
+    <string name="decline">拒绝</string>
+    <string name="searching">搜索中...</string>
 
 
 </resources>

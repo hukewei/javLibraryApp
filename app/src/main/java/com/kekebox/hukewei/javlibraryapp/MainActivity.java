@@ -1,6 +1,7 @@
 package com.kekebox.hukewei.javlibraryapp;
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,9 +12,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,6 +26,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 
+import com.gc.materialdesign.views.ButtonFlat;
+import com.gc.materialdesign.widgets.Dialog;
 import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -46,6 +51,7 @@ public class MainActivity extends ActionBarActivity
     private static final String TAG = "MainActivity";
     private Menu menu;
     String videoId;
+    Dialog dialog;
 
 
     /**
@@ -87,6 +93,26 @@ public class MainActivity extends ActionBarActivity
             Intent detail_intent = new Intent(this, VideoDetailActivity.class);
             startActivity(detail_intent);
         }
+
+        dialog = new Dialog(this,getString(R.string.warning_title), getString(R.string.warning_text));
+        // Set accept click listenner
+        dialog.setOnAcceptButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        // Set cancel click listenner
+        dialog.setOnCancelButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        // Acces to accept button
+
+        //dialog.show();
+
 
     }
 
@@ -186,6 +212,13 @@ public class MainActivity extends ActionBarActivity
             restoreActionBar();
             this.menu = menu;
             updateMenuTitles();
+            // Associate searchable configuration with the SearchView
+            SearchManager searchManager =
+                    (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView =
+                    (SearchView) menu.findItem(R.id.search).getActionView();
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
             return true;
         }
         return super.onCreateOptionsMenu(menu);
@@ -260,7 +293,18 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            //setHasOptionsMenu(true);
             return rootView;
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//            inflater.inflate(R.menu.main, menu);
+//            MenuItem searchMenuItem = menu.findItem(R.id.search);
+//            SearchView searchView = (SearchView) searchMenuItem.getActionView();
+//            searchView.setIconified(false);
+            //searchMenuItem.expandActionView();
+            super.onCreateOptionsMenu(menu, inflater);
         }
 
         @Override

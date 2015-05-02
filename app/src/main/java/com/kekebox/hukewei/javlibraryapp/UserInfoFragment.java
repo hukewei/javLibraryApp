@@ -20,11 +20,11 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -35,7 +35,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -50,11 +49,14 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
     private Drawable oldBackground = null;
     private PagerSlidingTabStrip tabs;
     private final Handler handler = new Handler();
+    private static boolean isFirstLaunch = true;
 
     /**
      * Keep track of the preference retrieve task to ensure we can cancel it if requested.
      */
     private PreferenceRetrieveTask mPrefTask = null;
+    private boolean taskProcessed = false;
+    private static Object monitor = new Object();
 
     // Tab titles
 
@@ -63,6 +65,17 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentActivity faActivity = (FragmentActivity) super.getActivity();
         new PreferenceRetrieveTask(JavUser.getCurrentUser().getUserId()).execute((Void) null);
+        if(isFirstLaunch) {
+            while (!taskProcessed) {
+                synchronized (monitor) {
+                    try {
+                        monitor.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }
+        isFirstLaunch = false;
         // Replace LinearLayout by the type of the root element of the layout you're trying to load
         RelativeLayout llLayout = (RelativeLayout) inflater.inflate(R.layout.no_swipe_tab_fragment, container, false);
         // Initilization
@@ -93,6 +106,7 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
         tabs.setDividerColor(Color.TRANSPARENT);
         tabs.setBackgroundColor(Color.WHITE);
         tabs.setIndicatorColor(getResources().getColor(R.color.fuchsia));
+
         return llLayout;
     }
     private Drawable.Callback drawableCallback = new Drawable.Callback() {
@@ -201,28 +215,38 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
                     } else {
                         Log.d(TAG, "client ID not need to update");
                     }
-
-
+                    taskProcessed = true;
+                    synchronized(monitor) {
+                        monitor.notifyAll();
+                    }
                     Log.i(TAG, json_string);
+                    return true;
                 } else {
+                    taskProcessed = true;
+                    synchronized(monitor) {
+                        monitor.notifyAll();
+                    }
                     return false;
                 }
             } catch(Exception e) {
                 e.printStackTrace();
             }
+            taskProcessed = true;
+            synchronized(monitor) {
+                monitor.notifyAll();
+            }
+
             return true;
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
+
             if(clientIdToUpdate != null) {
                 new ClientIDUpdateTask(JavUser.getCurrentUser().getUserId(), "clientID", "PUSH", clientIdToUpdate, "").execute((Void) null);
             }
-
-
             if (success) {
-                //mAdapter.notifyDataSetChanged();
-                //fixme inform current fragment
+
             } else {
                 Toast.makeText(getActivity(), "刷新失败，请稍后再试", Toast.LENGTH_SHORT).show();
             }

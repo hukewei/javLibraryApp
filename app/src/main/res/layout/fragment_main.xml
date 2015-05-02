@@ -8,11 +8,12 @@
 
     <TextView android:id="@+id/section_label" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="程序猿正在加班加点，敬请期待"
+        android:text="请点击顶端放大镜进行搜索"
         android:textStyle="bold"
-        android:layout_centerVertical="true"
+        android:textColor="@color/silver"
+        android:textSize="20dp"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:textColor="#fff90095"
-        android:textSize="20dp" />
+        android:layout_marginTop="92dp" />
 
 </RelativeLayout>

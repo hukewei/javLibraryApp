@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#f7f7fa"
+    android:id="@+id/ranging_fragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+        <ProgressBar android:id="@+id/video_detail_progress" style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+        <LinearLayout android:id="@+id/search_result_empty"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="60dp"
+            android:gravity="center">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:id="@+id/search_icon"
+                    android:src="@drawable/abc_ic_search_api_mtrl_alpha"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="没有找到结果"
+                    android:textColor="#a6a6a8"
+                    android:textSize="18dp" />
+                </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:text="一般番号格式为: 字母-数字，如XXR-104，格式越匹配，搜索的准确度更高。"
+                android:textColor="#a6a6a8"
+                android:gravity="center_horizontal"
+                android:layout_margin="10dp" />
+        </LinearLayout>
+
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:gravity="fill_vertical"
+            android:divider="@color/silver_light"
+            android:dividerHeight="0.2sp"
+            android:paddingLeft="7dp"
+            android:paddingRight="7dp"
+            android:clipToPadding="false"
+            android:paddingTop="2dip"
+            android:paddingBottom="10dip"
+            android:scrollbarStyle="outsideOverlay"
+            android:id="@+id/video_list"
+            android:visibility="gone" />
+
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -21,7 +21,7 @@ public class JavLibApplication extends Application {
 
         super.onCreate();
 
-        JPushInterface.setDebugMode(true); 	// 设置开启日志,发布时请关闭日志
+        JPushInterface.setDebugMode(false); 	// 设置开启日志,发布时请关闭日志
         JPushInterface.init(this);     		// 初始化 JPush
     }
 
@@ -148,11 +148,11 @@ public class JavLibApplication extends Application {
                 break;
         }
         if(!id_pool.isEmpty())  {
-            Log.d("BasicOfferFragment", "ID pool size = " + id_pool.size());
+            Log.d("JavLibApplication", "ID pool size = " + id_pool.size());
             if(id_pool.size() - loaded_pool.size()<number) {
                 number = id_pool.size() - loaded_pool.size();
             }
-            Log.d("BasicOfferFragment", "number final = " + number);
+            Log.d("JavLibApplication", "number final = " + number);
             for (int i = 0;  ; i++) {
                 if(i == id_pool.size() || list_to_load.size() == number) {
                     break;
@@ -163,7 +163,7 @@ public class JavLibApplication extends Application {
                 }
             }
         } else {
-            Log.d("BasicOfferFragment", "id pool is empty");
+            Log.d("JavLibApplication", "id pool is empty");
         }
         return list_to_load;
     }
