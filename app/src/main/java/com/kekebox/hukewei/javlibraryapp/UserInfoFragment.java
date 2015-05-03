@@ -49,7 +49,7 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
     private Drawable oldBackground = null;
     private PagerSlidingTabStrip tabs;
     private final Handler handler = new Handler();
-    private static boolean isFirstLaunch = true;
+    public static boolean isFirstLaunch = true;
 
     /**
      * Keep track of the preference retrieve task to ensure we can cancel it if requested.

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import com.kekebox.hukewei.javlibraryapp.JavUser;
+import com.kekebox.hukewei.javlibraryapp.UserInfoFragment;
 import com.kekebox.hukewei.javlibraryapp.VideoInfoItem;
 
 import java.util.ArrayList;
@@ -368,6 +369,18 @@ public class JavLibApplication extends Application {
 
     public void setAllIDs(ArrayList<String> allIDs) {
         AllIDs = allIDs;
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        UserInfoFragment.isFirstLaunch = true;
+    }
+
+    public boolean isAlreadyLoaded() {
+        return (!mostWantedIDs.isEmpty() && !newEntriesIDs.isEmpty() &&
+                !newReleasesIDs.isEmpty() && ! bestRatedIDs.isEmpty() &&
+                !mostWantedItemList.isEmpty());
     }
 
 

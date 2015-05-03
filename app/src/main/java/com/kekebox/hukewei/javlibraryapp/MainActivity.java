@@ -83,6 +83,7 @@ public class MainActivity extends ActionBarActivity
 
         if(JavLibApplication.getCurrentVideoItem() != null) {
             Intent detail_intent = new Intent(this, VideoDetailActivity.class);
+
             startActivity(detail_intent);
         }
 
@@ -106,6 +107,17 @@ public class MainActivity extends ActionBarActivity
         //dialog.show();
 
 
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        videoId = intent.getStringExtra("VideoID");
+        if(videoId != null) {
+            if(JavLibApplication.getCurrentVideoItem() != null) {
+                Intent detail_intent = new Intent(this, VideoDetailActivity.class);
+                startActivity(detail_intent);
+            }
+        }
     }
 
 

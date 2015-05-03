@@ -46,6 +46,9 @@ public class SplashScreenActivity extends Activity {
     private static final int PROGRESS_TASK = NB_FIRST_LOAD_TASK;
     boolean loadFinished = false;
     String videoId = null;
+    private boolean taskProcessed = false;
+    private static Object monitor = new Object();
+
 
     /** Called when the activity is first created. */
     @Override
@@ -57,15 +60,35 @@ public class SplashScreenActivity extends Activity {
         if(videoId != null) {
             Log.d(TAG, "video id = "+ videoId);
             new VideoDetailRetrieveTask(this, videoId, JavLibApplication.VideoType.All).execute((Void) null);
+            while (!taskProcessed) {
+                synchronized (monitor) {
+                    try {
+                        monitor.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
         } else {
             Log.d(TAG, "no intent for video id");
         }
-        new VideoIDsRetrieveTask(this, getString(R.string.most_wanted_feed_url), ((JavLibApplication)getApplication()).mostWantedIDs).execute((Void) null);
-        new VideoIDsRetrieveTask(this, getString(R.string.best_rated_feed_url), ((JavLibApplication)getApplication()).bestRatedIDs).execute((Void) null);
-        new VideoIDsRetrieveTask(this, getString(R.string.new_releases_feed_url), ((JavLibApplication)getApplication()).newReleasesIDs).execute((Void) null);
-        new VideoIDsRetrieveTask(this, getString(R.string.new_entries_feed_url), ((JavLibApplication)getApplication()).newEntriesIDs).execute((Void) null);
+        if(((JavLibApplication)getApplication()).isAlreadyLoaded()) {
+            Intent mainIntent = new Intent(SplashScreenActivity.this, MainActivity.class);
+            if(videoId != null) {
+                Bundle myBundle = new Bundle();
+                myBundle.putString("VideoID", videoId);
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                mainIntent.putExtras(myBundle);
+            }
+            startActivity(mainIntent);
+            finish();
+        } else {
 
+            new VideoIDsRetrieveTask(this, getString(R.string.most_wanted_feed_url), ((JavLibApplication) getApplication()).mostWantedIDs).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.best_rated_feed_url), ((JavLibApplication) getApplication()).bestRatedIDs).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_releases_feed_url), ((JavLibApplication) getApplication()).newReleasesIDs).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_entries_feed_url), ((JavLibApplication) getApplication()).newEntriesIDs).execute((Void) null);
 
+        }
 
 
     }
@@ -117,11 +140,23 @@ public class SplashScreenActivity extends Activity {
                     JSONArray jsonObj = new JSONArray(json_string);
                     JSONObject jsob = jsonObj.getJSONObject(0);
                     currentItem = new VideoInfoItem(jsob);
+                    if(videoId != null) {
+                        taskProcessed = true;
+                        synchronized (monitor) {
+                            monitor.notifyAll();
+                        }
+                    }
                     return true;
 
                 }
             } catch(Exception e) {
                 e.printStackTrace();
+            }
+            if(videoId != null) {
+                taskProcessed = true;
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
             return false;
         }
@@ -136,6 +171,7 @@ public class SplashScreenActivity extends Activity {
                 Log.d(TAG, "currentItem is null");
                 //Toast.makeText(mContext,"载入失败，请重试！", Toast.LENGTH_SHORT).show();
             }
+
         }
 
         @Override
