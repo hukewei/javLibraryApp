@@ -87,7 +87,13 @@ public class SearchResultsActivity extends ActionBarActivity {
             query = processQuery(query);
             Log.d(TAG, "query = " + query);
             Query = query;
-            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchResult).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchResult, "title").execute((Void) null);
+        } else if(Intent.ACTION_SEARCH_LONG_PRESS.equals(intent.getAction())){
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            query = processQuery(query);
+            Log.d(TAG, "query = " + query);
+            Query = query;
+            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchResult, "actor").execute((Void) null);
         }
     }
 
@@ -157,12 +163,14 @@ public class SearchResultsActivity extends ActionBarActivity {
         Context mContext;
         String mFeedURL;
         ArrayList<VideoInfoItem> mResultReference;
+        String searchType;
 
 
-        public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<VideoInfoItem> result) {
+        public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<VideoInfoItem> result, String type) {
             mContext = context;
-            mFeedURL = req_url + "?regex[title]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
+            mFeedURL = req_url;
             mResultReference = result;
+            searchType = type;
         }
 
         @Override
@@ -172,6 +180,11 @@ public class SearchResultsActivity extends ActionBarActivity {
             HttpResponse response;
             JSONObject json = new JSONObject();
             //SystemClock.sleep(1000);
+            if(searchType.equals("actor")) {
+                mFeedURL = mFeedURL + "?regex[actor]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
+            } else {
+                mFeedURL = mFeedURL + "?regex[title]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
+            }
 
             try {
                 HttpGet get = new HttpGet(mFeedURL);
@@ -234,7 +247,11 @@ public class SearchResultsActivity extends ActionBarActivity {
                     }
                 }
             }, 0);
-            getSupportActionBar().setTitle(getString(R.string.search_results));
+            if(searchType.equals("actor")) {
+                getSupportActionBar().setTitle(Query + getString(R.string.videos_of_actor));
+            } else {
+                getSupportActionBar().setTitle(getString(R.string.search_results));
+            }
         }
 
         @Override

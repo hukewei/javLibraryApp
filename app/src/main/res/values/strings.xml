@@ -42,6 +42,8 @@
     <string name="javapp_title">Jav小助手是什么？</string>
     <string name="javapp_text">Jav小助手是专门为手机端设计的非官方客户端，非javlibrary.com开发。应用的内容通过爬虫抓取自javlibrary.com，本应用不对内容负任何责任，也不对应用对使用者产生的结果负任何责任，如果您不接受次条款，请立即停止使用本应用，并将其彻底卸载。如果您发现本应用侵害了您的权益，请立即联系我们。</string>
     <string name="title_section4">关于</string>
+    <string name="double_click_exit">再按一次来退出应用</string>
+    <string name="videos_of_actor"> 参演的作品</string>
 
 
 </resources>

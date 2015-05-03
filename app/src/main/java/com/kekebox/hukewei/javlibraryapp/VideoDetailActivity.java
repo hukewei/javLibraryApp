@@ -503,8 +503,16 @@ public class VideoDetailActivity extends ActionBarActivity {
             }
         }
 
+
+
         @Override
         protected void onCancelled() {
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        JavLibApplication.setCurrentVideoItem(null);
     }
 }

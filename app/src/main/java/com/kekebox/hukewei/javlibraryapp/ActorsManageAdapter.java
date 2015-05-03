@@ -5,8 +5,11 @@ package com.kekebox.hukewei.javlibraryapp;
  */
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,6 +78,16 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
         final SwipeLayout swipeLayout = (SwipeLayout)v.findViewById(getSwipeLayoutResourceId(position));
         final TextView bigName = (TextView) v.findViewById(R.id.big_name);
         SwitchButton sb = (SwitchButton) v.findViewById(R.id.sb_use_listener);
+
+        swipeLayout.setOnDoubleClickListener(new SwipeLayout.DoubleClickListener() {
+            @Override
+            public void onDoubleClick(SwipeLayout swipeLayout, boolean b) {
+                Intent mainIntent = new Intent(mContext, SearchResultsActivity.class);
+                mainIntent.setAction(Intent.ACTION_SEARCH_LONG_PRESS);
+                mainIntent.putExtra(SearchManager.QUERY, actorItem.get(position));
+                mContext.startActivity(mainIntent);
+            }
+        });
 
         swipeLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
