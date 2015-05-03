@@ -36,18 +36,26 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
+
 /**
  * Created by hukewei on 02/05/15.
  */
 public class SearchResultsActivity extends ActionBarActivity {
 
     private static final String TAG = "SearchResultsActivity";
-    private static final int MAX_LOAD_IDS = 150;
+    private static final int MAX_LOAD_IDS = 250;
+    private static final int NB_TASK_LOAD_SCROLL = 15;
+    private static final int NB_FIRST_LOAD_TASK = 30;
     String Query;
     VideoPictureAdapter mAdapter;
     ArrayList<VideoInfoItem> searchResult;
+    ArrayList<String> searchIDsResult;
     ListView myListView;
     private ProgressBar pb;
+    private SmoothProgressBar spb;
+    private ArrayList<String> searchPendingIDs = new ArrayList<>();
+    private ArrayList<String> searchLoadedIDs = new ArrayList<>();
 
 
     @Override
@@ -57,8 +65,10 @@ public class SearchResultsActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.searching));
         searchResult = new ArrayList<>();
+        searchIDsResult = new ArrayList<>();
         mAdapter = new VideoPictureAdapter(this, searchResult);
         pb = (ProgressBar)findViewById(R.id.video_detail_progress);
+        spb = (SmoothProgressBar) findViewById(R.id.smooth_progressbar);
         myListView = ((ListView)findViewById(R.id.video_list));
         myListView.setAdapter(mAdapter);
         myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -73,6 +83,15 @@ public class SearchResultsActivity extends ActionBarActivity {
         ImageView searchIcon = (ImageView)findViewById(R.id.search_icon);
         searchIcon.setColorFilter(getResources().getColor(R.color.silver));
         handleIntent(getIntent());
+        myListView.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                Log.d(TAG, "onLoadMore");
+                ArrayList<String> videos_to_load =  getVideoIDs(JavLibApplication.VideoType.All, NB_TASK_LOAD_SCROLL);
+                Log.d(TAG,"VIDEOS TO LOADS = " + videos_to_load);
+                new VideoDetailMultipleRetrieveTask(SearchResultsActivity.this, videos_to_load, JavLibApplication.VideoType.All, null).execute((Void) null);
+            }
+        });
     }
 
     @Override
@@ -87,13 +106,13 @@ public class SearchResultsActivity extends ActionBarActivity {
             query = processQuery(query);
             Log.d(TAG, "query = " + query);
             Query = query;
-            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchResult, "title").execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchIDsResult, "title").execute((Void) null);
         } else if(Intent.ACTION_SEARCH_LONG_PRESS.equals(intent.getAction())){
             String query = intent.getStringExtra(SearchManager.QUERY);
             query = processQuery(query);
             Log.d(TAG, "query = " + query);
             Query = query;
-            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchResult, "actor").execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchIDsResult, "actor").execute((Void) null);
         }
     }
 
@@ -162,11 +181,11 @@ public class SearchResultsActivity extends ActionBarActivity {
         private static final String TAG = "VideoIDsRetrieveTask";
         Context mContext;
         String mFeedURL;
-        ArrayList<VideoInfoItem> mResultReference;
+        ArrayList<String> mResultReference;
         String searchType;
 
 
-        public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<VideoInfoItem> result, String type) {
+        public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<String> result, String type) {
             mContext = context;
             mFeedURL = req_url;
             mResultReference = result;
@@ -181,9 +200,9 @@ public class SearchResultsActivity extends ActionBarActivity {
             JSONObject json = new JSONObject();
             //SystemClock.sleep(1000);
             if(searchType.equals("actor")) {
-                mFeedURL = mFeedURL + "?regex[actor]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
+                mFeedURL = mFeedURL + "?regex[actor]=/"+ Query +"/&limit="+MAX_LOAD_IDS + "&only_id=1";
             } else {
-                mFeedURL = mFeedURL + "?regex[title]=/"+ Query +"/&limit="+MAX_LOAD_IDS;
+                mFeedURL = mFeedURL + "?regex[title]=/"+ Query +"/&limit="+MAX_LOAD_IDS + "&only_id=1";
             }
 
             try {
@@ -209,10 +228,9 @@ public class SearchResultsActivity extends ActionBarActivity {
                                 mResultReference.clear();
                                 int ub = results.length()>MAX_LOAD_IDS?MAX_LOAD_IDS:results.length();
                                 for (int i = 0; i <ub; i++) {
-                                    JSONObject current_record = results.getJSONObject(i);
-                                    VideoInfoItem item = new VideoInfoItem(current_record);
-                                    mResultReference.add(item);
-                                    Log.d(TAG, "add one item into the list = " + current_record.toString());
+                                    String current_record = results.getJSONObject(i).getString("_id");
+                                    mResultReference.add(current_record);
+                                    Log.d(TAG, "add one id into the list = " + current_record);
                                 }
                                 return true;
                             }
@@ -230,13 +248,124 @@ public class SearchResultsActivity extends ActionBarActivity {
         protected void onPostExecute(final Boolean success) {
             //Things to do when Task finished with success or not
             //mMileAccrualHistoryTask = null;
-            if (success) {
 
-                mAdapter.notifyDataSetChanged();
-                myListView.invalidateViews();
+                ArrayList<String> videos_to_load = getVideoIDs(JavLibApplication.VideoType.All, NB_FIRST_LOAD_TASK);
+                new VideoDetailMultipleRetrieveTask(SearchResultsActivity.this, videos_to_load, JavLibApplication.VideoType.All, searchType).execute((Void) null);
+
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            //mMileAccrualHistoryTask = null;
+        }
+    }
+
+    public class VideoDetailMultipleRetrieveTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String TAG = "VideoDetailRetrieveTask";
+        Context mContext;
+        String mFeedURL;
+        JavLibApplication.VideoType mType;
+        String mEncodedVideoId;
+        ArrayList<String> ids;
+        boolean endOfList = false;
+        String searchType;
+
+
+        public VideoDetailMultipleRetrieveTask(Context context,  ArrayList<String> ids, JavLibApplication.VideoType type, String search_type) {
+            switch (type) {
+                default:
+                    mFeedURL = getString(R.string.all_videos_feed_url);
+            }
+            this.ids = ids;
+            mContext = context;
+            mType = type;
+            searchType = search_type;
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            if(ids.isEmpty()) {
+                endOfList = true;
+                return false;
+
+            }
+
+            runOnUiThread(new Runnable() {
+                    public void run() {
+                if (spb != null) {
+                    spb.setVisibility(View.VISIBLE);
+                    spb.progressiveStart();
+                }
+            }
+        });
+
+            mEncodedVideoId = ids.get(0);
+            for (int i = 1; i < ids.size(); i++) {
+                mEncodedVideoId += "@" + ids.get(i);
+            }
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+
+            try {
+                HttpGet get = new HttpGet(mFeedURL+ "/" + mEncodedVideoId);
+                response = client.execute(get);
+
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    JSONArray results =  new JSONArray(json_string);
+                    if (results.length()>0) {
+                        for (int i = 0; i <results.length(); i++) {
+                            final VideoInfoItem currentItem = new VideoInfoItem(results.getJSONObject(i));
+                            searchResult.add(currentItem);
+
+                        }
+                        return true;
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            //Things to do when Task finished with success or not
+            //mMileAccrualHistoryTask = null;
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    if(spb != null)
+                        spb.progressiveStop();
+                }
+            }, 800);
+            mAdapter.notifyDataSetChanged();
+            myListView.invalidateViews();
+
+            if (success) {
+                for (int i = 0; i < ids.size(); i++) {
+                    onLoadSucceed(ids.get(i), mType);
+                }
+
 
             } else {
-
+                for (int i = 0; i < ids.size(); i++) {
+                    onLoadFailed(ids.get(i), mType);
+                }
+                if(endOfList) {
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            if(spb != null)
+                                spb.setVisibility(View.GONE);
+                        }
+                    }, 0);
+                    //Toast.makeText(mContext, "暂时没有可以加载的信息了哦！", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Toast.makeText(mContext, "载入失败，请重试！", Toast.LENGTH_SHORT).show();
+                }
             }
             new Handler().postDelayed(new Runnable() {
                 public void run() {
@@ -246,17 +375,74 @@ public class SearchResultsActivity extends ActionBarActivity {
                         findViewById(R.id.search_result_empty).setVisibility(View.VISIBLE);
                     }
                 }
-            }, 0);
-            if(searchType.equals("actor")) {
-                getSupportActionBar().setTitle(Query + getString(R.string.videos_of_actor));
-            } else {
-                getSupportActionBar().setTitle(getString(R.string.search_results));
+            }, 10);
+            if(searchType != null) {
+                if (searchType.equals("actor")) {
+                    getSupportActionBar().setTitle(Query + getString(R.string.videos_of_actor));
+                } else {
+                    getSupportActionBar().setTitle(getString(R.string.search_results));
+                }
             }
         }
 
         @Override
         protected void onCancelled() {
+            for (int i = 0; i < ids.size(); i++) {
+                onLoadFailed(ids.get(i), mType);
+            }
             //mMileAccrualHistoryTask = null;
         }
     }
+
+    public void onLoadSucceed(String video_id, JavLibApplication.VideoType type) {
+        switch (type) {
+            default:
+                searchPendingIDs.remove(video_id);
+                searchLoadedIDs.add(video_id);
+                //mostWantedIDs.remove(video_id);
+                break;
+        }
+    }
+
+    public void onLoadFailed(String video_id, JavLibApplication.VideoType type) {
+        switch (type) {
+            default:
+                searchPendingIDs.remove(video_id);
+                break;
+        }
+    }
+
+    public ArrayList<String> getVideoIDs(JavLibApplication.VideoType type,int number) {
+        ArrayList<String> list_to_load = new ArrayList<>();
+        ArrayList<String> pending_pool = null;
+        ArrayList<String> loaded_pool = null;
+        ArrayList<String> id_pool = null;
+        switch (type) {
+            default:
+                pending_pool = searchPendingIDs;
+                id_pool = searchIDsResult;
+                loaded_pool = searchLoadedIDs;
+                break;
+        }
+        if(!id_pool.isEmpty())  {
+            Log.d(TAG, "ID pool size = " + id_pool.size());
+            if(id_pool.size() - loaded_pool.size()<number) {
+                number = id_pool.size() - loaded_pool.size();
+            }
+            Log.d(TAG, "number final = " + number);
+            for (int i = 0;  ; i++) {
+                if(i == id_pool.size() || list_to_load.size() == number) {
+                    break;
+                }
+                if (!pending_pool.contains(id_pool.get(i)) && !loaded_pool.contains(id_pool.get(i))) {
+                    list_to_load.add(id_pool.get(i));
+                    pending_pool.add(id_pool.get(i));
+                }
+            }
+        } else {
+            Log.d(TAG, "id pool is empty");
+        }
+        return list_to_load;
+    }
+
 }

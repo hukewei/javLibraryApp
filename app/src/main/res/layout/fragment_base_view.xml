@@ -73,7 +73,8 @@
             app:spb_progressiveStop_speed="3.4"
             app:spb_interpolator="spb_interpolator_acceleratedecelerate"
             android:layout_marginBottom="-3dp"
-            android:id="@+id/smooth_progressbar" />
+            android:id="@+id/smooth_progressbar"
+            android:layout_alignParentLeft="false" />
 
     </RelativeLayout>
 

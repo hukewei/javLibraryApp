@@ -14,7 +14,8 @@
         <ProgressBar android:id="@+id/video_detail_progress" style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_centerVertical="true"
+            android:layout_marginTop="62dp"
+            android:layout_below="@+id/video_list"
             android:layout_centerHorizontal="true" />
         <LinearLayout android:id="@+id/search_result_empty"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -55,7 +56,7 @@
 
         <ListView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="fill_parent"
             android:layout_margin="2dp"
             android:gravity="fill_vertical"
             android:divider="@color/silver_light"
@@ -68,6 +69,27 @@
             android:scrollbarStyle="outsideOverlay"
             android:id="@+id/video_list"
             android:visibility="gone" />
+        <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            app:spb_sections_count="3"
+            app:spb_color="@color/fuchsia"
+            app:spb_speed="1.8"
+            app:spb_stroke_width="4dp"
+            app:spb_stroke_separator_length="10dp"
+            app:spb_reversed="false"
+            app:spb_mirror_mode="false"
+            app:spb_progressiveStart_activated="true"
+            app:spb_progressiveStart_speed="1.2"
+            app:spb_progressiveStop_speed="3.4"
+            app:spb_interpolator="spb_interpolator_acceleratedecelerate"
+            android:id="@+id/smooth_progressbar"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="-3dp" />
+
+
 
 
     </RelativeLayout>
