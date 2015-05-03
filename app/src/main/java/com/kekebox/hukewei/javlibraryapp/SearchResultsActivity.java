@@ -54,8 +54,8 @@ public class SearchResultsActivity extends ActionBarActivity {
     ListView myListView;
     private ProgressBar pb;
     private SmoothProgressBar spb;
-    private ArrayList<String> searchPendingIDs = new ArrayList<>();
-    private ArrayList<String> searchLoadedIDs = new ArrayList<>();
+    private ArrayList<String> searchPendingIDs;
+    private ArrayList<String> searchLoadedIDs;
 
 
     @Override
@@ -66,6 +66,8 @@ public class SearchResultsActivity extends ActionBarActivity {
         getSupportActionBar().setTitle(getString(R.string.searching));
         searchResult = new ArrayList<>();
         searchIDsResult = new ArrayList<>();
+        searchPendingIDs = new ArrayList<>();
+        searchLoadedIDs = new ArrayList<>();
         mAdapter = new VideoPictureAdapter(this, searchResult);
         pb = (ProgressBar)findViewById(R.id.video_detail_progress);
         spb = (SmoothProgressBar) findViewById(R.id.smooth_progressbar);

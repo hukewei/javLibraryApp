@@ -14,7 +14,7 @@
         <ProgressBar android:id="@+id/video_detail_progress" style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="62dp"
+            android:layout_marginTop="60dp"
             android:layout_below="@+id/video_list"
             android:layout_centerHorizontal="true" />
         <LinearLayout android:id="@+id/search_result_empty"
