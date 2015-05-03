@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -23,6 +26,7 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 
@@ -63,12 +67,7 @@ public class MainActivity extends ActionBarActivity
         setupUI(findViewById(R.id.drawer_layout));
 
         Intent intent = getIntent();
-        videoId = intent.getStringExtra("VideoID");
-        if(videoId != null) {
-            Log.d(TAG, "video id = " + videoId);
-        } else {
-            Log.d(TAG, "no intent for video id");
-        }
+        handleIntent(intent);
 
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -79,13 +78,6 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-        ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
-
-        if(JavLibApplication.getCurrentVideoItem() != null) {
-            Intent detail_intent = new Intent(this, VideoDetailActivity.class);
-
-            startActivity(detail_intent);
-        }
 
         dialog = new Dialog(this,getString(R.string.warning_title), getString(R.string.warning_text));
         // Set accept click listenner
@@ -111,12 +103,18 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    public void handleIntent(Intent intent) {
         videoId = intent.getStringExtra("VideoID");
         if(videoId != null) {
-            if(JavLibApplication.getCurrentVideoItem() != null) {
+                Log.d(TAG, "video id = "+ videoId);
+                Bundle myBundle = new Bundle();
+                myBundle.putString("VideoID", videoId);
                 Intent detail_intent = new Intent(this, VideoDetailActivity.class);
+                detail_intent.putExtras(myBundle);
                 startActivity(detail_intent);
-            }
         }
     }
 
@@ -343,5 +341,6 @@ public class MainActivity extends ActionBarActivity
             }
         }, 1200);
     }
+
 
 }

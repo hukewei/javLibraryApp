@@ -235,7 +235,6 @@ public class UserInfoFragment extends android.support.v4.app.Fragment implements
             synchronized(monitor) {
                 monitor.notifyAll();
             }
-
             return true;
         }
 

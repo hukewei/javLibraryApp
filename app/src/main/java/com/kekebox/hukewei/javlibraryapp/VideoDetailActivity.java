@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -34,6 +36,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -70,6 +73,7 @@ public class VideoDetailActivity extends ActionBarActivity {
     boolean isWantedVideo;
 
     SnackBar snackbar;
+    private String videoId = null;
 
 
     @Override
@@ -103,191 +107,289 @@ public class VideoDetailActivity extends ActionBarActivity {
                 .cacheOnDisk(true)
                 .build();
 
-        if(JavLibApplication.getCurrentVideoItem() == null) {
+        Intent intent = getIntent();
+        videoId = intent.getStringExtra("VideoID");
+        if(JavLibApplication.getCurrentVideoItem() == null && videoId == null) {
             Log.d(TAG, "no current video item, finish");
             finish();
         } else {
-            item = JavLibApplication.getCurrentVideoItem();
+            if(videoId == null) {
 
-
-
-            isFavoriteVideo = JavUser.getCurrentUser().getFavoriteVideos().contains(item.getId());
-            isWatchedVideo = JavUser.getCurrentUser().getWatchedVideos().contains(item.getId());
-            isWantedVideo = JavUser.getCurrentUser().getWantedVideos().contains(item.getId());
-
-            if(isFavoriteVideo) {
-                favoriteVideo.setBootstrapType("danger");
+                findViewById(R.id.main_layout).setVisibility(View.VISIBLE);
+                findViewById(R.id.load_notification).setVisibility(View.GONE);
+                inflateView();
             } else {
-                favoriteVideo.setBootstrapType("default");
+                new VideoDetailRetrieveTask(this, videoId, JavLibApplication.VideoType.All).execute((Void) null);
+            }
+        }
+
+    }
+
+    public class VideoDetailRetrieveTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String TAG = "VideoDetailRetrieveTask";
+        Context mContext;
+        String mFeedURL;
+        JavLibApplication.VideoType mType;
+        String mVideoId;
+        VideoInfoItem currentItem = null;
+
+
+        public VideoDetailRetrieveTask(Context context,  String id, JavLibApplication.VideoType type) {
+            switch (type) {
+                case MostWanted:
+                    mFeedURL = getString(R.string.most_wanted_feed_url);
+                    break;
+                case BestRated:
+                    mFeedURL = getString(R.string.best_rated_feed_url);
+                    break;
+                case NewEntries:
+                    mFeedURL = getString(R.string.new_entries_feed_url);
+                    break;
+                case NewReleases:
+                    mFeedURL = getString(R.string.new_releases_feed_url);
+                    break;
+                default:
+                    mFeedURL = getString(R.string.all_videos_feed_url);
+            }
+            mContext = context;
+            mType = type;
+            mVideoId = id;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+
+            try {
+                HttpGet get = new HttpGet(mFeedURL+ "/" + mVideoId);
+                response = client.execute(get);
+
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    Log.i(TAG, json_string);
+                    JSONArray jsonObj = new JSONArray(json_string);
+                    JSONObject jsob = jsonObj.getJSONObject(0);
+                    currentItem = new VideoInfoItem(jsob);
+                    return true;
+
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
             }
 
-            if(isWatchedVideo) {
-                watchedVideo.setBootstrapType("danger");
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            //Things to do when Task finished with success or not
+            //mMileAccrualHistoryTask = null;
+            if (success && currentItem != null) {
+                JavLibApplication.setCurrentVideoItem(currentItem);
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        inflateView();
+                    }
+                }, 0);
+
             } else {
-                watchedVideo.setBootstrapType("default");
+                Log.d(TAG, "currentItem is null");
+                Toast.makeText(mContext,"载入失败", Toast.LENGTH_SHORT).show();
+                finish();
             }
-
-            if(isWantedVideo) {
-                wantedVideo.setBootstrapType("danger");
-            } else {
-                wantedVideo.setBootstrapType("default");
-            }
-
-            favoriteVideo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(!JavUser.getCurrentUser().isLogin()) {
-                        snackbar = new SnackBar(VideoDetailActivity.this, getString(R.string.please_login), "返回", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
-                        snackbar.show();
-                        return;
-                    }
-                    String action_type;
-                    if(!isFavoriteVideo) {
-                        //to add favorite action
-                        action_type = "PUSH";
-                        JavUser.getCurrentUser().getFavoriteVideosItemList().add(item);
-                        JavUser.getCurrentUser().getLoadedFavoriteVideos().add(item.getId());
-                    } else {
-                        action_type = "PULL";
-                        JavUser.getCurrentUser().getFavoriteVideosItemList().remove(item);
-                        JavUser.getCurrentUser().getLoadedFavoriteVideos().remove(item.getId());
-                    }
-                    favoriteVideo.setBootstrapButtonEnabled(false);
-
-                    new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
-                            PreferenceType.favorite_videos.toString(), action_type,
-                            item.getId(), "").execute((Void) null);
-                }
-            });
-
-            watchedVideo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(!JavUser.getCurrentUser().isLogin()) {
-                        snackbar = new SnackBar(VideoDetailActivity.this, getString(R.string.please_login), "返回", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
-                        snackbar.show();
-                        return;
-                    }
-                    String action_type;
-                    if(!isWatchedVideo) {
-                        //to add favorite action
-                        action_type = "PUSH";
-                        JavUser.getCurrentUser().getWatchedVideosItemList().add(item);
-                        JavUser.getCurrentUser().getLoadedWatchedVideos().add(item.getId());
-                    } else {
-                        action_type = "PULL";
-                        JavUser.getCurrentUser().getWatchedVideosItemList().remove(item);
-                        JavUser.getCurrentUser().getLoadedWatchedVideos().remove(item.getId());
-                    }
-                    watchedVideo.setBootstrapButtonEnabled(false);
-                    new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
-                            PreferenceType.watched_videos.toString(), action_type,
-                            item.getId(), "").execute((Void) null);
-                }
-            });
-
-            wantedVideo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(!JavUser.getCurrentUser().isLogin()) {
-                        snackbar = new SnackBar(VideoDetailActivity.this, getString(R.string.please_login), "返回", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
-                        snackbar.show();
-                        //Toast.makeText(VideoDetailActivity.this, "该功能仅注册用户可用", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    String action_type;
-                    if(!isWantedVideo) {
-                        //to add favorite action
-                        action_type = "PUSH";
-                        JavUser.getCurrentUser().getWantedVideosItemList().add(item);
-                        JavUser.getCurrentUser().getLoadedWantedVideos().add(item.getId());
-                    } else {
-                        action_type = "PULL";
-                        JavUser.getCurrentUser().getWantedVideosItemList().remove(item);
-                        JavUser.getCurrentUser().getLoadedWantedVideos().remove(item.getId());
-                    }
-                    wantedVideo.setBootstrapButtonEnabled(false);
-                    new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
-                            PreferenceType.wanted_videos.toString(), action_type,
-                            item.getId(), "").execute((Void) null);
-                }
-            });
-
-
-            getSupportActionBar().setTitle(item.getDesignation());
-            designation.setText("识别码：\t" + item.getDesignation());
-            title.setText("片名：\t" + item.getTitle());
-            release_date.setText("发行：\t" + item.getReleaseDate());
-            duration.setText("长度：\t" + item.getDuration() + " 分钟");
-            String category = "分类：\t";
-            for(int i = 0; i< item.getCategories().size();i++) {
-                category+= " "+item.getCategories().get(i);
-            }
-            categories.setText(category);
-            String actor = "演员：\t";
-            for(int i = 0; i< item.getActors().size();i++) {
-                String isLiked = "";
-                String current_actor = item.getActors().get(i);
-                if(JavUser.getCurrentUser().getFavoriteActors().contains(current_actor)) {
-                    isLiked = "#";
-                } else {
-                    isLiked = "@";
-                }
-
-                actor+= " " + isLiked +item.getActors().get(i);
-            }
-            actors.setText(actor);
-
-            awesomeTextViewHandler = new AwesomeTextHandler();
-            awesomeTextViewHandler
-                    .addViewSpanRenderer(HASHTAG_PATTERN, new LikedTagsSpanRenderer())
-                    .addViewSpanRenderer(MENTION_PATTERN, new ToLikeSpanRenderer())
-                    .setView(actors);
-
-            ImageLoader.getInstance().displayImage(item.getImageUrls(), mImage, options,new SimpleImageLoadingListener() {
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            findViewById(R.id.pic_progressbar).setVisibility(View.GONE);
-                        }
-                    });
-
-
-            fabWeb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Uri uri = Uri.parse(item.getWebUrl());
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                }
-            });
-            fabShare.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle() + ":" + item.getWebUrl());
-                    sendIntent.setType("text/plain");
-                    startActivity(Intent.createChooser(sendIntent, "分享至.."));
-                }
-            });
 
         }
+
+        @Override
+        protected void onCancelled() {
+            //mMileAccrualHistoryTask = null;
+        }
     }
+
+    public void inflateView() {
+        item = JavLibApplication.getCurrentVideoItem();
+        isFavoriteVideo = JavUser.getCurrentUser().getFavoriteVideos().contains(item.getId());
+        isWatchedVideo = JavUser.getCurrentUser().getWatchedVideos().contains(item.getId());
+        isWantedVideo = JavUser.getCurrentUser().getWantedVideos().contains(item.getId());
+
+        if (isFavoriteVideo) {
+            favoriteVideo.setBootstrapType("danger");
+        } else {
+            favoriteVideo.setBootstrapType("default");
+        }
+
+        if (isWatchedVideo) {
+            watchedVideo.setBootstrapType("danger");
+        } else {
+            watchedVideo.setBootstrapType("default");
+        }
+
+        if (isWantedVideo) {
+            wantedVideo.setBootstrapType("danger");
+        } else {
+            wantedVideo.setBootstrapType("default");
+        }
+
+        favoriteVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!JavUser.getCurrentUser().isLogin()) {
+                    snackbar = new SnackBar(VideoDetailActivity.this, getString(R.string.please_login), "返回", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                        }
+                    });
+                    snackbar.show();
+                    return;
+                }
+                String action_type;
+                if (!isFavoriteVideo) {
+                    //to add favorite action
+                    action_type = "PUSH";
+                    JavUser.getCurrentUser().getFavoriteVideosItemList().add(item);
+                    JavUser.getCurrentUser().getLoadedFavoriteVideos().add(item.getId());
+                } else {
+                    action_type = "PULL";
+                    JavUser.getCurrentUser().getFavoriteVideosItemList().remove(item);
+                    JavUser.getCurrentUser().getLoadedFavoriteVideos().remove(item.getId());
+                }
+                favoriteVideo.setBootstrapButtonEnabled(false);
+
+                new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
+                        PreferenceType.favorite_videos.toString(), action_type,
+                        item.getId(), "").execute((Void) null);
+            }
+        });
+
+        watchedVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!JavUser.getCurrentUser().isLogin()) {
+                    snackbar = new SnackBar(VideoDetailActivity.this, getString(R.string.please_login), "返回", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                        }
+                    });
+                    snackbar.show();
+                    return;
+                }
+                String action_type;
+                if (!isWatchedVideo) {
+                    //to add favorite action
+                    action_type = "PUSH";
+                    JavUser.getCurrentUser().getWatchedVideosItemList().add(item);
+                    JavUser.getCurrentUser().getLoadedWatchedVideos().add(item.getId());
+                } else {
+                    action_type = "PULL";
+                    JavUser.getCurrentUser().getWatchedVideosItemList().remove(item);
+                    JavUser.getCurrentUser().getLoadedWatchedVideos().remove(item.getId());
+                }
+                watchedVideo.setBootstrapButtonEnabled(false);
+                new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
+                        PreferenceType.watched_videos.toString(), action_type,
+                        item.getId(), "").execute((Void) null);
+            }
+        });
+
+        wantedVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!JavUser.getCurrentUser().isLogin()) {
+                    snackbar = new SnackBar(VideoDetailActivity.this, getString(R.string.please_login), "返回", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                        }
+                    });
+                    snackbar.show();
+                    //Toast.makeText(VideoDetailActivity.this, "该功能仅注册用户可用", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String action_type;
+                if (!isWantedVideo) {
+                    //to add favorite action
+                    action_type = "PUSH";
+                    JavUser.getCurrentUser().getWantedVideosItemList().add(item);
+                    JavUser.getCurrentUser().getLoadedWantedVideos().add(item.getId());
+                } else {
+                    action_type = "PULL";
+                    JavUser.getCurrentUser().getWantedVideosItemList().remove(item);
+                    JavUser.getCurrentUser().getLoadedWantedVideos().remove(item.getId());
+                }
+                wantedVideo.setBootstrapButtonEnabled(false);
+                new PreferenceUpdateTask(JavUser.getCurrentUser().getUserId(),
+                        PreferenceType.wanted_videos.toString(), action_type,
+                        item.getId(), "").execute((Void) null);
+            }
+        });
+
+
+        getSupportActionBar().setTitle(item.getDesignation());
+        designation.setText("识别码：\t" + item.getDesignation());
+        title.setText("片名：\t" + item.getTitle());
+        release_date.setText("发行：\t" + item.getReleaseDate());
+        duration.setText("长度：\t" + item.getDuration() + " 分钟");
+        String category = "分类：\t";
+        for (int i = 0; i < item.getCategories().size(); i++) {
+            category += " " + item.getCategories().get(i);
+        }
+        categories.setText(category);
+        String actor = "演员：\t";
+        for (int i = 0; i < item.getActors().size(); i++) {
+            String isLiked = "";
+            String current_actor = item.getActors().get(i);
+            if (JavUser.getCurrentUser().getFavoriteActors().contains(current_actor)) {
+                isLiked = "#";
+            } else {
+                isLiked = "@";
+            }
+
+            actor += " " + isLiked + item.getActors().get(i);
+        }
+        actors.setText(actor);
+
+        awesomeTextViewHandler = new AwesomeTextHandler();
+        awesomeTextViewHandler
+                .addViewSpanRenderer(HASHTAG_PATTERN, new LikedTagsSpanRenderer())
+                .addViewSpanRenderer(MENTION_PATTERN, new ToLikeSpanRenderer())
+                .setView(actors);
+
+        ImageLoader.getInstance().displayImage(item.getImageUrls(), mImage, options, new SimpleImageLoadingListener() {
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                findViewById(R.id.pic_progressbar).setVisibility(View.GONE);
+            }
+        });
+
+
+        fabWeb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = Uri.parse(item.getWebUrl());
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
+        });
+        fabShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, item.getTitle() + ":" + item.getWebUrl());
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, "分享至.."));
+            }
+        });
+        findViewById(R.id.main_layout).setVisibility(View.VISIBLE);
+        findViewById(R.id.load_notification).setVisibility(View.GONE);
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -1,12 +1,21 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" xmlns:fab="http://schemas.android.com/apk/res-auto" android:id="@+id/drawer_layout"
     xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
     android:background="#f7f7fa">
+    <ProgressBar
+        android:id="@+id/load_notification"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/main_layout"
+        android:visibility="gone">
         <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
             <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:orientation="vertical"
@@ -214,4 +223,4 @@
     </RelativeLayout>
 
 
-</LinearLayout>
+</RelativeLayout>

@@ -6,8 +6,13 @@ import android.util.Log;
 import com.kekebox.hukewei.javlibraryapp.JavUser;
 import com.kekebox.hukewei.javlibraryapp.UserInfoFragment;
 import com.kekebox.hukewei.javlibraryapp.VideoInfoItem;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import cn.jpush.android.api.JPushInterface;
 
@@ -24,6 +29,17 @@ public class JavLibApplication extends Application {
 
         JPushInterface.setDebugMode(false); 	// 设置开启日志,发布时请关闭日志
         JPushInterface.init(this);     		// 初始化 JPush
+
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+                getApplicationContext())
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .denyCacheImageMultipleSizesInMemory()
+                .discCacheFileNameGenerator(new Md5FileNameGenerator())
+                .tasksProcessingOrder(QueueProcessingType.LIFO)
+                .writeDebugLogs() // Remove for release app
+                .build();
+        ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
+
     }
 
     public static enum VideoType {
@@ -148,6 +164,9 @@ public class JavLibApplication extends Application {
                 loaded_pool = JavUser.getCurrentUser().getLoadedWatchedVideos();
                 break;
         }
+        Log.d(TAG, "loaded_list = " + loaded_pool);
+        Log.d(TAG, "pending_list = " + pending_pool);
+        Log.d(TAG, "id_pool = " + id_pool);
         if(!id_pool.isEmpty())  {
             Log.d("JavLibApplication", "ID pool size = " + id_pool.size());
             if(id_pool.size() - loaded_pool.size()<number) {
@@ -172,37 +191,37 @@ public class JavLibApplication extends Application {
     public static void onLoadSucceed(String video_id, VideoType type) {
         switch (type) {
             case MostWanted:
-                mostWantedPendingIDs.remove(video_id);
+                mostWantedPendingIDs.removeAll(Arrays.asList(video_id));
                 mostWantedLoadedIDs.add(video_id);
                 //mostWantedIDs.remove(video_id);
                 break;
             case BestRated:
-                bestRatedPendingIDs.remove(video_id);
+                bestRatedPendingIDs.removeAll(Arrays.asList(video_id));
                 bestRatedLoadedIDs.add(video_id);
                 //bestRatedIDs.remove(video_id);
                 break;
             case NewReleases:
-                newReleasesPendingIDs.remove(video_id);
+                newReleasesPendingIDs.removeAll(Arrays.asList(video_id));
                 newReleasesLoadedIDs.add(video_id);
                 //newReleasesIDs.remove(video_id);
                 break;
             case NewEntries:
-                newEntriesPendingIDs.remove(video_id);
+                newEntriesPendingIDs.removeAll(Arrays.asList(video_id));
                 newEntriesLoadedIDs.add(video_id);
                 //newEntriesIDs.remove(video_id);
                 break;
             case FavoriteVideos:
-                JavUser.getCurrentUser().getFavoriteVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getFavoriteVideosPendingIDs().removeAll(Arrays.asList(video_id));
                 JavUser.getCurrentUser().getLoadedFavoriteVideos().add(video_id);
                 //newEntriesIDs.remove(video_id);
                 break;
             case WantedVideos:
-                JavUser.getCurrentUser().getWantedVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getWantedVideosPendingIDs().removeAll(Arrays.asList(video_id));
                 JavUser.getCurrentUser().getLoadedWantedVideos().add(video_id);
                 //newEntriesIDs.remove(video_id);
                 break;
             case WatchedVideos:
-                JavUser.getCurrentUser().getWatchedVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getWatchedVideosPendingIDs().removeAll(Arrays.asList(video_id));
                 JavUser.getCurrentUser().getLoadedWatchedVideos().add(video_id);
                 //newEntriesIDs.remove(video_id);
                 break;
@@ -212,25 +231,25 @@ public class JavLibApplication extends Application {
     public static void onLoadFailed(String video_id, VideoType type) {
         switch (type) {
             case MostWanted:
-                mostWantedPendingIDs.remove(video_id);
+                mostWantedPendingIDs.removeAll(Arrays.asList(video_id));
                 break;
             case BestRated:
-                bestRatedPendingIDs.remove(video_id);
+                bestRatedPendingIDs.removeAll(Arrays.asList(video_id));
                 break;
             case NewReleases:
-                newReleasesPendingIDs.remove(video_id);
+                newReleasesPendingIDs.removeAll(Arrays.asList(video_id));
                 break;
             case NewEntries:
-                newEntriesPendingIDs.remove(video_id);
+                newEntriesPendingIDs.removeAll(Arrays.asList(video_id));
                 break;
             case FavoriteVideos:
-                JavUser.getCurrentUser().getFavoriteVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getFavoriteVideosPendingIDs().removeAll(Arrays.asList(video_id));
                 break;
             case WantedVideos:
-                JavUser.getCurrentUser().getWantedVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getWantedVideosPendingIDs().removeAll(Arrays.asList(video_id));
                 break;
             case WatchedVideos:
-                JavUser.getCurrentUser().getWatchedVideosPendingIDs().remove(video_id);
+                JavUser.getCurrentUser().getWatchedVideosPendingIDs().removeAll(Arrays.asList(video_id));
                 break;
         }
     }
@@ -375,6 +394,8 @@ public class JavLibApplication extends Application {
     public void onLowMemory() {
         super.onLowMemory();
         UserInfoFragment.isFirstLaunch = true;
+        ImageLoader.getInstance().clearMemoryCache();
+        ImageLoader.getInstance().clearDiscCache();
     }
 
     public boolean isAlreadyLoaded() {

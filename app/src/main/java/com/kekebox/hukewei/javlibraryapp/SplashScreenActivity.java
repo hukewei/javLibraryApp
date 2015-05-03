@@ -46,8 +46,6 @@ public class SplashScreenActivity extends Activity {
     private static final int PROGRESS_TASK = NB_FIRST_LOAD_TASK;
     boolean loadFinished = false;
     String videoId = null;
-    private boolean taskProcessed = false;
-    private static Object monitor = new Object();
 
 
     /** Called when the activity is first created. */
@@ -59,15 +57,7 @@ public class SplashScreenActivity extends Activity {
         videoId = intent.getStringExtra("VideoID");
         if(videoId != null) {
             Log.d(TAG, "video id = "+ videoId);
-            new VideoDetailRetrieveTask(this, videoId, JavLibApplication.VideoType.All).execute((Void) null);
-            while (!taskProcessed) {
-                synchronized (monitor) {
-                    try {
-                        monitor.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
+
         } else {
             Log.d(TAG, "no intent for video id");
         }
@@ -140,24 +130,14 @@ public class SplashScreenActivity extends Activity {
                     JSONArray jsonObj = new JSONArray(json_string);
                     JSONObject jsob = jsonObj.getJSONObject(0);
                     currentItem = new VideoInfoItem(jsob);
-                    if(videoId != null) {
-                        taskProcessed = true;
-                        synchronized (monitor) {
-                            monitor.notifyAll();
-                        }
-                    }
+
                     return true;
 
                 }
             } catch(Exception e) {
                 e.printStackTrace();
             }
-            if(videoId != null) {
-                taskProcessed = true;
-                synchronized (monitor) {
-                    monitor.notifyAll();
-                }
-            }
+
             return false;
         }
 

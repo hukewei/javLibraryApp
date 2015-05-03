@@ -304,6 +304,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             HttpResponse response;
 
             try {
+                Log.d(TAG, "sending "+ mFeedURL+ "/" + mEncodedVideoId);
                 HttpGet get = new HttpGet(mFeedURL+ "/" + mEncodedVideoId);
                 response = client.execute(get);
 
@@ -314,6 +315,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                         for (int i = 0; i <results.length(); i++) {
                             final VideoInfoItem currentItem = new VideoInfoItem(results.getJSONObject(i));
                             VideoItemList.add(currentItem);
+                            Log.d(TAG, "adding " + currentItem);
 
                         }
                         return true;
@@ -336,8 +338,6 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     spb.progressiveStop();
                 }
             }, 800);
-            mAdapter.notifyDataSetChanged();
-            myListView.invalidateViews();
 
             if (success) {
                 for (int i = 0; i < ids.size(); i++) {
@@ -368,6 +368,8 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
                 }
             }, 50);
+            mAdapter.notifyDataSetChanged();
+            myListView.invalidateViews();
 
         }
 
