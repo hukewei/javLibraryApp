@@ -56,6 +56,8 @@ public class SearchResultsActivity extends ActionBarActivity {
     private SmoothProgressBar spb;
     private ArrayList<String> searchPendingIDs;
     private ArrayList<String> searchLoadedIDs;
+    public int nbFinishedTask = 0;
+    public final int nbTotalTask = 3;
 
 
     @Override
@@ -109,12 +111,18 @@ public class SearchResultsActivity extends ActionBarActivity {
             Log.d(TAG, "query = " + query);
             Query = query;
             new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchIDsResult, "title").execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_entries_feed_url), searchIDsResult, "title").execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_releases_feed_url), searchIDsResult, "title").execute((Void) null);
         } else if(Intent.ACTION_SEARCH_LONG_PRESS.equals(intent.getAction())){
             String query = intent.getStringExtra(SearchManager.QUERY);
             query = processQuery(query);
             Log.d(TAG, "query = " + query);
+
             Query = query;
             new VideoIDsRetrieveTask(this, getString(R.string.all_videos_feed_url), searchIDsResult, "actor").execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_entries_feed_url), searchIDsResult, "actor").execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_releases_feed_url), searchIDsResult, "actor").execute((Void) null);
+
         }
     }
 
@@ -227,7 +235,7 @@ public class SearchResultsActivity extends ActionBarActivity {
                         if (keyValue.equals("results")) {
                             JSONArray results = jsonObj.getJSONArray(keyValue);
                             if (results.length()>0) {
-                                mResultReference.clear();
+                                //mResultReference.clear();
                                 int ub = results.length()>MAX_LOAD_IDS?MAX_LOAD_IDS:results.length();
                                 for (int i = 0; i <ub; i++) {
                                     String current_record = results.getJSONObject(i).getString("_id");
@@ -248,13 +256,13 @@ public class SearchResultsActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
+            nbFinishedTask++;
             //Things to do when Task finished with success or not
             //mMileAccrualHistoryTask = null;
-
+            if(nbFinishedTask == nbTotalTask) {
                 ArrayList<String> videos_to_load = getVideoIDs(JavLibApplication.VideoType.All, NB_FIRST_LOAD_TASK);
                 new VideoDetailMultipleRetrieveTask(SearchResultsActivity.this, videos_to_load, JavLibApplication.VideoType.All, searchType).execute((Void) null);
-
-
+            }
         }
 
         @Override
@@ -335,6 +343,7 @@ public class SearchResultsActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
+
             //Things to do when Task finished with success or not
             //mMileAccrualHistoryTask = null;
             Handler handler = new Handler();
@@ -369,15 +378,19 @@ public class SearchResultsActivity extends ActionBarActivity {
                     //Toast.makeText(mContext, "载入失败，请重试！", Toast.LENGTH_SHORT).show();
                 }
             }
+
             new Handler().postDelayed(new Runnable() {
+
                 public void run() {
                     myListView.setVisibility(View.VISIBLE);
                     pb.setVisibility(View.GONE);
                     if(searchResult.isEmpty()) {
                         findViewById(R.id.search_result_empty).setVisibility(View.VISIBLE);
+                    } else {
+                        findViewById(R.id.search_result_empty).setVisibility(View.GONE);
                     }
                 }
-            }, 10);
+            }, 0);
             if(searchType != null) {
                 if (searchType.equals("actor")) {
                     getSupportActionBar().setTitle(Query + getString(R.string.videos_of_actor));
@@ -385,6 +398,7 @@ public class SearchResultsActivity extends ActionBarActivity {
                     getSupportActionBar().setTitle(getString(R.string.search_results));
                 }
             }
+
         }
 
         @Override

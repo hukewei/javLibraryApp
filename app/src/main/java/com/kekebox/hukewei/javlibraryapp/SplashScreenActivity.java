@@ -73,10 +73,14 @@ public class SplashScreenActivity extends Activity {
             finish();
         } else {
 
-            new VideoIDsRetrieveTask(this, getString(R.string.most_wanted_feed_url), ((JavLibApplication) getApplication()).mostWantedIDs).execute((Void) null);
-            new VideoIDsRetrieveTask(this, getString(R.string.best_rated_feed_url), ((JavLibApplication) getApplication()).bestRatedIDs).execute((Void) null);
-            new VideoIDsRetrieveTask(this, getString(R.string.new_releases_feed_url), ((JavLibApplication) getApplication()).newReleasesIDs).execute((Void) null);
-            new VideoIDsRetrieveTask(this, getString(R.string.new_entries_feed_url), ((JavLibApplication) getApplication()).newEntriesIDs).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.most_wanted_feed_url),
+                    ((JavLibApplication) getApplication()).mostWantedIDs, JavLibApplication.VideoType.MostWanted).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.best_rated_feed_url),
+                    ((JavLibApplication) getApplication()).bestRatedIDs, JavLibApplication.VideoType.BestRated).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_releases_feed_url),
+                    ((JavLibApplication) getApplication()).newReleasesIDs, JavLibApplication.VideoType.NewReleases).execute((Void) null);
+            new VideoIDsRetrieveTask(this, getString(R.string.new_entries_feed_url),
+                    ((JavLibApplication) getApplication()).newEntriesIDs, JavLibApplication.VideoType.NewEntries).execute((Void) null);
 
         }
 
@@ -167,9 +171,12 @@ public class SplashScreenActivity extends Activity {
         ArrayList<String> mResultReference;
 
 
-        public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<String> result) {
+        public VideoIDsRetrieveTask(Context context, String req_url, ArrayList<String> result, JavLibApplication.VideoType type) {
             mContext = context;
             mFeedURL = req_url + "?only_id=1&limit="+MAX_LOAD_IDS_PER_CATEGORY;
+            if(type == JavLibApplication.VideoType.NewEntries || type == JavLibApplication.VideoType.NewReleases) {
+                mFeedURL += "&sort[release_date]=-1";
+            }
             mResultReference = result;
         }
 
