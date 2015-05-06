@@ -46,6 +46,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -160,7 +161,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 Log.d(TAG, "onLoadMore");
                 final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
                 Log.d(TAG,"VIDEOS TO LOADS = " + videos_to_load);
-                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type, false).execute((Void) null);
 //                ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_TASK_LOAD_SCROLL);
 //                for (int i = 0; i < videos_to_load.size(); i++) {
 //                    VideoDetailRetrieveTask atask = new VideoDetailRetrieveTask(getActivity(), videos_to_load.get(i), type);
@@ -174,7 +175,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             Log.d(TAG, "video item list is empty");
             final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
             if(!videos_to_load.isEmpty()) {
-                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type, false).execute((Void) null);
             } else {
                 myListView.setVisibility(View.VISIBLE);
                 pb.setVisibility(View.GONE);
@@ -210,7 +211,25 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         if(VideoItemList.isEmpty()) {
             final ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
             if(!videos_to_load.isEmpty()) {
-                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+                new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type, false).execute((Void) null);
+            }
+        } else {
+            switch (type) {
+                case MostWanted:
+                    new VideoIDsRetrieveTask(getActivity(), getString(R.string.most_wanted_feed_url), type).execute((Void) null);
+                    break;
+                case NewEntries:
+                    new VideoIDsRetrieveTask(getActivity(), getString(R.string.new_entries_feed_url), type).execute((Void) null);
+                    break;
+                case NewReleases:
+                    new VideoIDsRetrieveTask(getActivity(), getString(R.string.new_releases_feed_url), type).execute((Void) null);
+                    break;
+                case BestRated:
+                    new VideoIDsRetrieveTask(getActivity(), getString(R.string.best_rated_feed_url), type).execute((Void) null);
+                    break;
+                default:
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    break;
             }
         }
         myListView.invalidateViews();
@@ -230,7 +249,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 
     public void updateList() {
         ArrayList<String> videos_to_load = ((JavLibApplication) getActivity().getApplication()).getVideoIDs(type, NB_FIRST_LOAD_TASK);
-        new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type).execute((Void) null);
+        new VideoDetailMultipleRetrieveTask(getActivity(), videos_to_load, type, false).execute((Void) null);
     }
 //
 //    @Override
@@ -252,9 +271,10 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
         String mEncodedVideoId;
         ArrayList<String> ids;
         boolean endOfList = false;
+        boolean isAppend;
 
 
-        public VideoDetailMultipleRetrieveTask(Context context,  ArrayList<String> ids, JavLibApplication.VideoType type) {
+        public VideoDetailMultipleRetrieveTask(Context context,  ArrayList<String> ids, JavLibApplication.VideoType type, boolean is_append) {
             switch (type) {
                 case MostWanted:
                     mFeedURL = getString(R.string.most_wanted_feed_url);
@@ -274,6 +294,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             this.ids = ids;
             mContext = context;
             mType = type;
+            isAppend = is_append;
 
         }
 
@@ -282,7 +303,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             if(getActivity() != null) {
                 getActivity().runOnUiThread(new Runnable() {
                     public void run() {
-                        if (spb != null) {
+                        if (spb != null && !isAppend) {
                             spb.setVisibility(View.VISIBLE);
                             spb.progressiveStart();
                         }
@@ -314,9 +335,12 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     if (results.length()>0) {
                         for (int i = 0; i <results.length(); i++) {
                             final VideoInfoItem currentItem = new VideoInfoItem(results.getJSONObject(i));
-                            VideoItemList.add(currentItem);
-                            Log.d(TAG, "adding " + currentItem);
-
+                            if (isAppend) {
+                                VideoItemList.add(0,currentItem);
+                            } else {
+                                VideoItemList.add(currentItem);
+                                Log.d(TAG, "adding " + currentItem);
+                            }
                         }
                         return true;
                     }
@@ -365,6 +389,9 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                 public void run() {
                     myListView.setVisibility(View.VISIBLE);
                     pb.setVisibility(View.GONE);
+                    if(isAppend) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
 
                 }
             }, 50);
@@ -378,6 +405,119 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             for (int i = 0; i < ids.size(); i++) {
                 JavLibApplication.onLoadFailed(ids.get(i), mType);
             }
+            //mMileAccrualHistoryTask = null;
+        }
+    }
+
+
+    public class VideoIDsRetrieveTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String TAG = "VideoIDsRetrieveTask";
+        Context mContext;
+        String mFeedURL;
+        ArrayList<String> mResultReference = new ArrayList<>();
+
+
+        public VideoIDsRetrieveTask(Context context, String req_url,  JavLibApplication.VideoType type) {
+            mContext = context;
+            mFeedURL = req_url + "?only_id=1&limit="+SplashScreenActivity.MAX_LOAD_IDS_PER_CATEGORY;
+            if(type == JavLibApplication.VideoType.NewEntries || type == JavLibApplication.VideoType.NewReleases) {
+                mFeedURL += "&sort[release_date]=-1";
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+            JSONObject json = new JSONObject();
+            //SystemClock.sleep(1000);
+
+            try {
+                HttpGet get = new HttpGet(mFeedURL);
+                Log.i(TAG, json.toString());
+                response = client.execute(get);
+
+                /*Checking response */
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    JSONObject jsonObj = new JSONObject(json_string);
+                    Iterator<String> keys= jsonObj.keys();
+                    while (keys.hasNext())
+                    {
+                        String keyValue = (String)keys.next();
+                        String valueString = jsonObj.getString(keyValue);
+                        Log.i(TAG, keyValue);
+                        Log.i(TAG, valueString);
+                        if (keyValue.equals("results")) {
+                            JSONArray results = jsonObj.getJSONArray(keyValue);
+                            if (results.length()>0) {
+                                for (int i = 0; i <SplashScreenActivity.MAX_LOAD_IDS_PER_CATEGORY; i++) {
+                                    String current_record = results.getJSONObject(i).getString("_id");
+                                    mResultReference.add(current_record);
+                                    Log.d(TAG, "add one item into the list = " + current_record);
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                    Log.i(TAG, json_string);
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if(success) {
+                ArrayList<String> previous_ids_list = null;
+                ArrayList<String> pending_pool = null;
+                switch (type) {
+                    case MostWanted:
+                        previous_ids_list = JavLibApplication.mostWantedIDs;
+                        pending_pool = JavLibApplication.mostWantedPendingIDs;
+                        break;
+                    case NewEntries:
+                        previous_ids_list = JavLibApplication.newEntriesIDs;
+                        pending_pool = JavLibApplication.newEntriesPendingIDs;
+                        break;
+                    case NewReleases:
+                        previous_ids_list = JavLibApplication.newReleasesIDs;
+                        pending_pool = JavLibApplication.newReleasesPendingIDs;
+                        break;
+                    case BestRated:
+                        previous_ids_list = JavLibApplication.bestRatedIDs;
+                        pending_pool = JavLibApplication.bestRatedPendingIDs;
+                        break;
+                }
+                mResultReference.removeAll(previous_ids_list);
+                if (!mResultReference.isEmpty()) {
+                    previous_ids_list.addAll(mResultReference);
+                    pending_pool.addAll(mResultReference);
+                    new VideoDetailMultipleRetrieveTask(getActivity(), mResultReference, type, true).execute((Void) null);
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                        }
+                    }, 0);
+                } else {
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getActivity(), "别着急，暂时没有新片哦！", Toast.LENGTH_LONG).show();
+                            mSwipeRefreshLayout.setRefreshing(false);
+                        }
+                    }, 0);
+                }
+            }
+            //Things to do when Task finished with success or not
+            //mMileAccrualHistoryTask = null;
+
+        }
+
+        @Override
+        protected void onCancelled() {
             //mMileAccrualHistoryTask = null;
         }
     }

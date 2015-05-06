@@ -34,7 +34,7 @@ import cn.jpush.android.api.JPushInterface;
  */
 public class SplashScreenActivity extends Activity {
 
-    private static final int MAX_LOAD_IDS_PER_CATEGORY = 250;
+    public static final int MAX_LOAD_IDS_PER_CATEGORY = 250;
     private static final String TAG = "SplashActivity";
     /** Duration of wait **/
     private int finished_task = 0;
