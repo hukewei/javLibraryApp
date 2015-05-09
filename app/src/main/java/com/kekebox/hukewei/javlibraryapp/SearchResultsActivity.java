@@ -239,7 +239,9 @@ public class SearchResultsActivity extends ActionBarActivity {
                                 int ub = results.length()>MAX_LOAD_IDS?MAX_LOAD_IDS:results.length();
                                 for (int i = 0; i <ub; i++) {
                                     String current_record = results.getJSONObject(i).getString("_id");
-                                    mResultReference.add(current_record);
+                                    if(!mResultReference.contains(current_record)) {
+                                        mResultReference.add(current_record);
+                                    }
                                     Log.d(TAG, "add one id into the list = " + current_record);
                                 }
                                 return true;

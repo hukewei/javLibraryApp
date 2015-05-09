@@ -243,7 +243,7 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
 //
 //            }
 //        }, 2000);
-        mSwipeRefreshLayout.setRefreshing(false);
+        //mSwipeRefreshLayout.setRefreshing(false);
 
     }
 
@@ -364,6 +364,9 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
             }, 800);
 
             if (success) {
+                if(isAppend) {
+                    Toast.makeText(mContext, "新增" + ids.size() + "部影片。", Toast.LENGTH_SHORT).show();
+                }
                 for (int i = 0; i < ids.size(); i++) {
                     JavLibApplication.onLoadSucceed(ids.get(i), mType);
                 }
