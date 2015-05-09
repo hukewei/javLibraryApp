@@ -2,7 +2,7 @@
 
 ## Download
 
-You can download the release APK file from [here](https://github.com/hukewei/javLibraryApp/blob/master/app/javlibapp.apk?raw=true).
+You can download the release APK file from [here](http://fir.im/mm9p/).
 
 ## Introduction
 
