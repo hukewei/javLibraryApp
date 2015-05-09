@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -30,10 +32,24 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 
+import com.gc.materialdesign.views.CheckBox;
 import com.gc.materialdesign.widgets.Dialog;
 import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 
 
 public class MainActivity extends ActionBarActivity
@@ -59,6 +75,7 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
     private boolean doubleBackToExitPressedOnce =false;
+    private UserLoginBackgroundTask mAuthTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +114,13 @@ public class MainActivity extends ActionBarActivity
         // Acces to accept button
 
         //dialog.show();
-
-
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String email = sharedPref.getString(getString(R.string.saved_email), null);
+        String pw = sharedPref.getString(getString(R.string.saved_pw), null);
+        if( !JavUser.getCurrentUser().isLogin() && email != null && pw != null) {
+            mAuthTask = new UserLoginBackgroundTask(email, pw);
+            mAuthTask.execute((Void) null);
+        }
     }
 
     @Override
@@ -340,6 +362,93 @@ public class MainActivity extends ActionBarActivity
                 doubleBackToExitPressedOnce=false;
             }
         }, 1200);
+    }
+
+
+    public class UserLoginBackgroundTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mEmail;
+        private final String mPassword;
+        JavUser mCurrentUser;
+
+        UserLoginBackgroundTask(String email, String password) {
+            mEmail = email;
+            mPassword = password;
+            mCurrentUser = JavUser.getCurrentUser();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), MainActivity.CONNECTION_TIMEOUT); //Timeout Limit
+            HttpResponse response;
+            JSONObject json = new JSONObject();
+
+            try {
+                HttpPost post = new HttpPost(getString(R.string.authentication_url));
+                json.put("email", mEmail);
+                json.put("password", mPassword);
+                StringEntity se = new StringEntity( json.toString());
+                Log.i(TAG, json.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                post.setEntity(se);
+                response = client.execute(post);
+
+                /*Checking response */
+                if(response!=null && response.getStatusLine().getStatusCode() == 200){
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    JSONObject jsonObj = new JSONObject(json_string);
+                    Iterator<String> keys= jsonObj.keys();
+                    while (keys.hasNext())
+                    {
+
+
+                        String keyValue = (String)keys.next();
+                        String valueString = jsonObj.getString(keyValue);
+                        Log.i(TAG, keyValue);
+                        Log.i(TAG, valueString);
+                        if(keyValue.contains("id")) {
+                            if(valueString.equals("ERROR")) {
+                                //login failed
+                                Log.d(TAG, "Login fail");
+                                mCurrentUser.setLogin(false);
+                                return false;
+                            } else {
+                                mCurrentUser.setLogin(true);
+                                mCurrentUser.setUserId(valueString);
+                                Log.d(TAG, "Login success");
+                                return true;
+                            }
+                        }
+                    }
+                    Log.i(TAG, json_string);
+                } else {
+                    mCurrentUser.setLogin(false);
+                    return false;
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+            if (success) {
+
+                updateMenuTitles();
+                Toast.makeText(MainActivity.this, "自动登陆成功", Toast.LENGTH_SHORT).show();
+                Fragment next_fragment = new UserInfoFragment();
+            } else {
+                Toast.makeText(MainActivity.this, "自动登陆失败", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+        }
     }
 
 
