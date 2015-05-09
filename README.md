@@ -11,9 +11,10 @@ This an Android Application retrieves videos information of JavLibrary using [Ja
 ## TODO
 
 * Search videos by Designation, Category or Actor
-* ~~Favorite Actors~~, Favorite videos, Wanted videos, Watched videos for logged in users.
-* New release notification for favorite actors.
-* Server End API to scrape new videos and support notifications(maybe TBD on the [JavLibraryRESTful](https://github.com/hukewei/javLibraryRESTful)).
+* ~~Favorite Actors, Favorite videos, Wanted videos, Watched videos for logged in users~~.
+* ~~New release notification for favorite actors~~.
+* ~~Server End API to scrape new videos and support notifications(maybe TBD on the [JavLibraryRESTful](https://github.com/hukewei/javLibraryRESTful))~~.
+* videos recommender based on users preferences
 
 
 
