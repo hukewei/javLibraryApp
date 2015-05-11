@@ -37,6 +37,7 @@ import com.gc.materialdesign.widgets.Dialog;
 import com.kekebox.hukewei.javlibraryapp.jav.JavLibApplication;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.umeng.update.UmengUpdateAgent;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -121,6 +122,8 @@ public class MainActivity extends ActionBarActivity
             mAuthTask = new UserLoginBackgroundTask(email, pw);
             mAuthTask.execute((Void) null);
         }
+
+        UmengUpdateAgent.update(this);
     }
 
     @Override

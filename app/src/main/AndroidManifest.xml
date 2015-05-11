@@ -134,6 +134,18 @@
         <!-- Required  . Enable it you can get statistics data with channel -->
         <meta-data android:name="JPUSH_CHANNEL" android:value="developer-default"/>
         <meta-data android:name="JPUSH_APPKEY" android:value="c2c5344f606271adb56ea4c2" /> <!--  </>值来自开发者平台取得的AppKey-->
+
+        <!-- umeng auto upgrade-->
+        <meta-data android:value="55511b84e0f55a1d3800447e" android:name="UMENG_APPKEY"/>
+
+        <service
+            android:name="com.umeng.update.net.DownloadingService"
+            android:process=":DownloadingService" >
+        </service>
+        <activity
+            android:name="com.umeng.update.UpdateDialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
     </application>
 
 </manifest>

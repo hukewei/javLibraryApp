@@ -10,7 +10,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,7 +49,8 @@ import it.sephiroth.android.library.imagezoom.ImageViewTouch;
 /**
  * Created by hukewei on 25/04/15.
  */
-public class VideoDetailActivity extends ActionBarActivity {
+public class VideoDetailActivity extends ActionBarActivity implements GestureDetector.OnGestureListener,
+        View.OnTouchListener {
     private static final String TAG = "VideoDetailActivity";
     ImageView photo;
     TextView title;
@@ -75,12 +78,19 @@ public class VideoDetailActivity extends ActionBarActivity {
     SnackBar snackbar;
     private String videoId = null;
 
+    private GestureDetector mGestureDetector;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_detail);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mGestureDetector = new GestureDetector(this);
+        findViewById(android.R.id.content).setOnTouchListener(this);
+        this.overridePendingTransition(R.anim.slide_in_from_right,
+                R.anim.slide_out_to_left);
 
         //photo = (ImageView) findViewById(R.id.iv_photo);
         mImage = (ImageViewTouch) findViewById(R.id.iv_photo);
@@ -123,6 +133,71 @@ public class VideoDetailActivity extends ActionBarActivity {
             }
         }
 
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        this.overridePendingTransition(R.anim.slide_in_from_left,
+                R.anim.slide_out_to_right);
+
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev){
+        super.dispatchTouchEvent(ev);
+        return mGestureDetector.onTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        int MAJOR_MOVE = 75;
+        int MAJOR_SPEED = 1000;
+        int dx = (int) (e2.getX() - e1.getX());
+        // don't accept the fling if it's too short
+        // as it may conflict with a button push
+        if (Math.abs(dx) > MAJOR_MOVE && Math.abs(velocityX) > Math.abs(velocityY)) {
+            if (velocityX > MAJOR_SPEED) {
+                finish();
+
+            } else {
+
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        mGestureDetector.onTouchEvent(event);
+        return true;
     }
 
     public class VideoDetailRetrieveTask extends AsyncTask<Void, Void, Boolean> {

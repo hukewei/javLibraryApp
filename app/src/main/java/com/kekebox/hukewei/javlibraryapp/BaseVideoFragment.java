@@ -500,11 +500,6 @@ public class BaseVideoFragment extends Fragment implements SwipeRefreshLayout.On
                     previous_ids_list.addAll(mResultReference);
                     pending_pool.addAll(mResultReference);
                     new VideoDetailMultipleRetrieveTask(getActivity(), mResultReference, type, true).execute((Void) null);
-                    new Handler().postDelayed(new Runnable() {
-                        public void run() {
-                            mSwipeRefreshLayout.setRefreshing(false);
-                        }
-                    }, 0);
                 } else {
                     new Handler().postDelayed(new Runnable() {
                         public void run() {
