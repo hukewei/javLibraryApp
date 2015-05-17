@@ -692,4 +692,12 @@ public class VideoDetailActivity extends ActionBarActivity implements GestureDet
         super.onBackPressed();
         JavLibApplication.setCurrentVideoItem(null);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(snackbar != null) {
+            snackbar.dismiss();
+        }
+    }
 }

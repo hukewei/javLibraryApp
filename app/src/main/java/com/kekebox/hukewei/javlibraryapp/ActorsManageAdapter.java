@@ -77,6 +77,7 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
         final View v = LayoutInflater.from(mContext).inflate(R.layout.favorite_actor_item, null);
         final SwipeLayout swipeLayout = (SwipeLayout)v.findViewById(getSwipeLayoutResourceId(position));
         final TextView bigName = (TextView) v.findViewById(R.id.big_name);
+
         SwitchButton sb = (SwitchButton) v.findViewById(R.id.sb_use_listener);
 
         swipeLayout.setOnDoubleClickListener(new SwipeLayout.DoubleClickListener() {
@@ -84,7 +85,8 @@ public class ActorsManageAdapter extends BaseSwipeAdapter {
             public void onDoubleClick(SwipeLayout swipeLayout, boolean b) {
                 Intent mainIntent = new Intent(mContext, SearchResultsActivity.class);
                 mainIntent.setAction(Intent.ACTION_SEARCH_LONG_PRESS);
-                mainIntent.putExtra(SearchManager.QUERY, actorItem.get(position));
+                String currentActorName = ((TextView)v.findViewById(R.id.text_data)).getText().toString();
+                mainIntent.putExtra(SearchManager.QUERY, currentActorName);
                 mContext.startActivity(mainIntent);
             }
         });
