@@ -14,7 +14,10 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +82,8 @@ public class VideoDetailActivity extends ActionBarActivity implements GestureDet
     private String videoId = null;
 
     private GestureDetector mGestureDetector;
+    private final static int textSizeInDips = 8;
+
 
 
     @Override
@@ -416,14 +421,35 @@ public class VideoDetailActivity extends ActionBarActivity implements GestureDet
         }
         categories.setText(category);
         String actor = "演员：\t";
-        for (int i = 0; i < item.getActors().size(); i++) {
+
+
+
+        PredicateLayout actors_layout = (PredicateLayout) findViewById(R.id.actors_layout);
+        for (int i = 0; i < (item.getActors().size()<50?item.getActors().size():50); i++) {
+            //add actors as buttons
+            //Button btnTag = new Button(this);
+            //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            //params.setMargins(2, 2, 2, 2);
+            //btnTag.setLayoutParams(params);
+            //btnTag.setText(item.getActors().get(i));
+            //actors_layout.addView(btnTag);
             String isLiked = "";
             String current_actor = item.getActors().get(i);
+            int backgroundResource;
+            int textColorResource;
             if (JavUser.getCurrentUser().getFavoriteActors().contains(current_actor)) {
                 isLiked = "#";
+                backgroundResource = R.drawable.common_hashtags_background;
+                textColorResource = getResources().getColor(android.R.color.white);
+
             } else {
                 isLiked = "@";
+                backgroundResource = R.drawable.common_mentions_background;
+                textColorResource = Color.parseColor("#a6a6a8");
             }
+            //btnTag.setTextSize(dipsToPixels(VideoDetailActivity.this, textSizeInDips));
+            //btnTag.setBackgroundResource(backgroundResource);
+            //btnTag.setTextColor(textColorResource);
 
             actor += " " + isLiked + item.getActors().get(i);
         }
