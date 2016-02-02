@@ -75,9 +75,8 @@ MERGED from com.astuetz:pagerslidingtabstrip:1.0.1:4:5
 MERGED from com.android.support:support-v4:21.0.3:16:5
 MERGED from com.github.clans:fab:1.4.0:12:5
 MERGED from com.github.navasmdc:MaterialDesign:1.4:11:5
-MERGED from it.sephiroth.android.library.imagezoom:imagezoom:2.1.1:11:5
+MERGED from it.sephiroth.android.library.imagezoom:imagezoom:2.2.4:11:5
 MERGED from com.github.castorflex.smoothprogressbar:library:1.1.0:12:5
-MERGED from com.beardedhen:androidbootstrap:1.2.1:11:5
 MERGED from com.android.support:recyclerview-v7:21.0.0:17:5
 MERGED from com.android.support:support-v4:21.0.3:16:5
 MERGED from com.android.support:support-v4:21.0.3:16:5
@@ -308,9 +307,9 @@ MERGED from com.astuetz:pagerslidingtabstrip:1.0.1:2:5
 MERGED from com.android.support:support-v4:21.0.3:15:5
 MERGED from com.github.clans:fab:1.4.0:8:5
 MERGED from com.github.navasmdc:MaterialDesign:1.4:7:5
-MERGED from it.sephiroth.android.library.imagezoom:imagezoom:2.1.1:7:5
+MERGED from it.sephiroth.android.library.imagezoom:imagezoom:2.2.4:7:5
 MERGED from com.github.castorflex.smoothprogressbar:library:1.1.0:8:5
-MERGED from com.beardedhen:androidbootstrap:1.2.1:7:5
+MERGED from com.beardedhen:androidbootstrap:2.0.1:8:5
 MERGED from com.jmpergar:AwesomeText:1.0.0:7:5
 MERGED from com.android.support:recyclerview-v7:21.0.0:15:5
 MERGED from com.android.support:support-v4:21.0.3:15:5
